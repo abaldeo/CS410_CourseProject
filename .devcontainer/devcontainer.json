@@ -3,7 +3,7 @@
   "features": {
     "ghcr.io/devcontainers/features/python:1": {"installJupyterlab":true},
     "ghcr.io/devcontainers-contrib/features/poetry:2": {},
-    "ghcr.io/devcontainers-contrib/features/pipenv:2": {},
+    //"ghcr.io/devcontainers-contrib/features/pipenv:2": {},
     //"ghcr.io/devcontainers-contrib/features/cookiecutter:2": {},
     "ghcr.io/devcontainers/features/node:1": {},
     "ghcr.io/devcontainers/features/docker-in-docker:2": {}
