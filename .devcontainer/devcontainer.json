@@ -5,6 +5,7 @@
 	"build": {
 		"dockerfile": "Dockerfile"
 	},  
+  // "postCreateCommand": "poetry install",
   // "runArgs": [
   //   "--pid=host",
   //   "--ipc=host",
