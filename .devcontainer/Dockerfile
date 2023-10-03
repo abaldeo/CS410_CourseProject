@@ -1,7 +1,6 @@
 # Use an official Python runtime as a parent image
 FROM mcr.microsoft.com/devcontainers/python:3
 
-
 ARG DEBIAN_FRONTEND=noninteractive
 ARG USER=vscode
 RUN apt update \
@@ -21,12 +20,15 @@ RUN set -x \
     && pyenv install -v ${PYTHON_VERSION} \
     && pyenv global ${PYTHON_VERSION}
 
-
 # Install Poetry
 ENV POETRY_HOME=${HOME}/.poetry
 ARG POETRY_PATH="${POETRY_HOME}/bin"
 ENV PATH="${POETRY_PATH}:$PATH"
-
 RUN curl -sSL https://install.python-poetry.org | python -
+
+# Install pdm
+ARG PDM_PATH="${HOME}/.local/bin"
+ENV PATH="${PDM_PATH}:$PATH"
+RUN curl -sSL https://pdm.fming.dev/install-pdm.py | python - 
 
 RUN pip install jupyterlab
