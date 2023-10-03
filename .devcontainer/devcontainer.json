@@ -18,7 +18,13 @@
     //"ghcr.io/devcontainers-contrib/features/pipenv:2": {},
     //"ghcr.io/devcontainers-contrib/features/cookiecutter:2": {},
     "ghcr.io/devcontainers/features/node:1": {},
-    "ghcr.io/devcontainers/features/docker-in-docker:2": {},
+    "ghcr.io/devcontainers-community/features/typescript": {},
+    "ghcr.io/devcontainers-contrib/features/tsx:1": {},
+    "ghcr.io/devcontainers/features/docker-in-docker:2": {
+      "moby": true,
+      "version": "latest",
+      "dockerDashComposeVersion": "v2"
+    },
     "ghcr.io/devcontainers/features/docker-outside-of-docker:1": {
       "moby": true,
       "version": "latest",
