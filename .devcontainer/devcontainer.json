@@ -1,0 +1,37 @@
+{
+  "image": "mcr.microsoft.com/devcontainers/universal:2",
+  "features": {
+    "ghcr.io/devcontainers/features/python:1": {"installJupyterlab":true},
+    "ghcr.io/devcontainers-contrib/features/poetry:2": {},
+    "ghcr.io/devcontainers-contrib/features/pipenv:2": {},
+    "ghcr.io/devcontainers-contrib/features/cookiecutter:2": {},
+    "ghcr.io/devcontainers/features/node:1": {},
+    "ghcr.io/devcontainers/features/docker-in-docker:2": {},
+    //serverless edge
+    "ghcr.io/devcontainers-contrib/features/vercel-serve:1": {},
+    "ghcr.io/devcontainers-contrib/features/cloudflare-wrangler:1":{},
+    "ghcr.io/devcontainers-contrib/features/netlify-cli:1": {},
+     //aws
+    "ghcr.io/devcontainers/features/aws-cli:1": {},
+    "ghcr.io/joshuanianji/devcontainer-features/aws-cli-persistence:0": {},
+    "ghcr.io/devcontainers-contrib/features/amplify-cli:2": {},
+    "ghcr.io/devcontainers-contrib/features/aws-eb-cli:1": {},
+    "ghcr.io/devcontainers-contrib/features/serverless:2": {},
+    //azure 
+    "ghcr.io/devcontainers/features/azure-cli:1": {},
+    "ghcr.io/stuartleeks/dev-container-features/azure-cli-persistence:0": {},
+    //google
+    "ghcr.io/dhoeric/features/google-cloud-cli:1": {},
+    //digitalocean
+    "ghcr.io/devcontainers-contrib/features/digitalocean-cli:1": {},
+    "ghcr.io/ElanHasson/devcontainer-features/digitalocean-doctl-cli-persistence:1": {}    
+  },
+  "customizations": {
+  // Configure properties specific to VS Code.
+  "vscode": {
+    // Set *default* container specific settings.json values on container create.
+    "settings": {},
+    "extensions": []
+    }
+  }
+}
