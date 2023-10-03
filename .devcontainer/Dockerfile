@@ -17,15 +17,18 @@ ARG PYENV_PATH="${PYENV_ROOT}/bin:${PYENV_ROOT}/shims"
 ENV PATH="${PYENV_PATH}:$PATH"
 RUN set -x \
     && curl http://pyenv.run | bash \
-     && echo 'eval "$(pyenv init -)"' >>${HOME}/.bashrc \
+    && echo 'eval "$(pyenv init -)"' >>${HOME}/.bashrc \
     && pyenv install -v ${PYTHON_VERSION} \
     && pyenv global ${PYTHON_VERSION}
 
 
 # Install Poetry
-ENV POETRY_ROOT=${HOME}/.poetry
-ARG POETRY_PATH="${POETRY_ROOT}/bin"
+ENV POETRY_HOME=${HOME}/.poetry
+ARG POETRY_PATH="${POETRY_HOME}/bin"
 ENV PATH="${POETRY_PATH}:$PATH"
-RUN curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py | python -
+
+RUN source ~/.bashrc
+
+RUN curl -sSL https://install.python-poetry.org | python -
 
 RUN pip install jupyterlab
