@@ -30,17 +30,7 @@
     //"ghcr.io/ElanHasson/devcontainer-features/digitalocean-doctl-cli-persistence:1": {}    
     
   },
-	// Use base images default CMD.
-	"overrideCommand": false,
-	// Forward Jupyter port locally, mark required.
-	"forwardPorts": [8888],
-	"portsAttributes": {
-		"8888": {
-			"label": "Jupyter",
-			"requireLocalPort": true,
-			"onAutoForward": "ignore"
-		}
-	},  
+
   "customizations": {
   // Configure properties specific to VS Code.
   "vscode": {
