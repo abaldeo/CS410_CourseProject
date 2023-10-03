@@ -6,11 +6,8 @@ USER ${USER}
 ARG HOME="/home/${USER}"
 WORKDIR ${HOME}
 RUN apt update \
-    && apt install -y --no-install-recommends curl wget git sudo build-essential libssl-dev zlib1g-dev libbz2-dev libreadline-dev libsqlite3-dev libncursesw5-dev xz-utils tk-dev libxml2-dev libxmlsec1-dev libffi-dev liblzma-dev \
-      && apt autoremove -y \
-    && rm -rf /var/lib/apt/lists/* 
-
- 
+    && apt install -y --no-install-recommends curl wget git sudo build-essential libssl-dev zlib1g-dev libbz2-dev libreadline-dev libsqlite3-dev libncursesw5-dev xz-utils tk-dev libxml2-dev libxmlsec1-dev libffi-dev liblzma-dev 
+    
 ARG PYTHON_VERSION=3.11
 ENV PYENV_ROOT=${HOME}/.pyenv
 ARG PYENV_PATH="${PYENV_ROOT}/bin:${PYENV_ROOT}/shims"
