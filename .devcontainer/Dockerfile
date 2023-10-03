@@ -32,3 +32,7 @@ ENV PATH="${PDM_PATH}:$PATH"
 RUN curl -sSL https://pdm.fming.dev/install-pdm.py | python - 
 
 RUN pip install jupyterlab
+
+#RUN set -x && pipx install pyscaffold && \
+#pipx install cookiecutter && \ 
+#pipx inject pyscaffold pyscaffoldext-cookiecutter

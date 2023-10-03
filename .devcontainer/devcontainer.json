@@ -63,6 +63,7 @@
   // "remoteUser": "vscode",
   // "forwardPorts": [8888],
   "appPort": [
+    "8000:8000",
     "8888:8888"
   ],
 
