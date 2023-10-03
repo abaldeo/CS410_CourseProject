@@ -27,8 +27,6 @@ ENV POETRY_HOME=${HOME}/.poetry
 ARG POETRY_PATH="${POETRY_HOME}/bin"
 ENV PATH="${POETRY_PATH}:$PATH"
 
-RUN source ~/.bashrc
-
 RUN curl -sSL https://install.python-poetry.org | python -
 
 RUN pip install jupyterlab
