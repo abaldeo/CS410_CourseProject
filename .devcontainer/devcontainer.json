@@ -1,15 +1,29 @@
+// For format details, see https://aka.ms/devcontainer.json. For config options, see the
+// README at: https://github.com/devcontainers/templates/tree/main/src/python
 {
+  "name": "Python 3",
 	"build": {
 		"dockerfile": "Dockerfile"
 	},  
+  // "runArgs": [
+  //   "--pid=host",
+  //   "--ipc=host",
+  //   "--network=host",
+  //   "-e",
+  //   "DISPLAY=${env:DISPLAY}"
+  // ],
   "features": {
     //"ghcr.io/devcontainers/features/python:1": {"installJupyterlab":true},
     //"ghcr.io/devcontainers-contrib/features/poetry:2": {},
     //"ghcr.io/devcontainers-contrib/features/pipenv:2": {},
     //"ghcr.io/devcontainers-contrib/features/cookiecutter:2": {},
     "ghcr.io/devcontainers/features/node:1": {},
-    //"ghcr.io/devcontainers/features/docker-in-docker:2": {}
-  
+    "ghcr.io/devcontainers/features/docker-in-docker:2": {},
+    "ghcr.io/devcontainers/features/docker-outside-of-docker:1": {
+      "moby": true,
+      "version": "latest",
+      "dockerDashComposeVersion": "v2"
+    },
     //serverless edge
     //"ghcr.io/devcontainers-contrib/features/vercel-serve:1": {},
     //"ghcr.io/devcontainers-contrib/features/cloudflare-wrangler:1":{},
@@ -27,9 +41,23 @@
     //"ghcr.io/dhoeric/features/google-cloud-cli:1": {},
     //digitalocean
     //"ghcr.io/devcontainers-contrib/features/digitalocean-cli:1": {},
-    //"ghcr.io/ElanHasson/devcontainer-features/digitalocean-doctl-cli-persistence:1": {}    
-    
+    //"ghcr.io/ElanHasson/devcontainer-features/digitalocean-doctl-cli-persistence:1": {} 
+    // "ghcr.io/devcontainers/features/common-utils:2": {
+    //     "installZsh": true,
+    //     "configureZshAsDefaultShell": true,
+    //     "installOhMyZsh": true,
+    //     "upgradePackages": true,
+    //     "username": "vscode",
+    //     "remoteUser": "vscode",
+    //     "userUid": "automatic",
+    //     "userGid": "automatic"
+    //   }
   },
+  // "remoteUser": "vscode",
+  // "forwardPorts": [8888],
+  "appPort": [
+    "8888:8888"
+  ],
 
   "customizations": {
   // Configure properties specific to VS Code.
@@ -37,6 +65,8 @@
     // Set *default* container specific settings.json values on container create.
     "settings": {},
     "extensions": []
+    // "extensions": ["ms-python.python", "ms-toolsai.jupyter"]
+
     }
   }
 }
