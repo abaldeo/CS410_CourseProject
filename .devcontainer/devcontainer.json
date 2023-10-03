@@ -1,5 +1,5 @@
 {
-  "image": "mcr.microsoft.com/devcontainers/universal:2",
+  "image": "mcr.microsoft.com/devcontainers/python:3",
   "features": {
     "ghcr.io/devcontainers/features/python:1": {"installJupyterlab":true},
     "ghcr.io/devcontainers-contrib/features/poetry:2": {},
