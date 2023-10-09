@@ -1,0 +1,133 @@
+This lecture is about
+the mixture model estimation. In this lecture, we're
+going to continue discussing probabilistic
+topic models. In particular, we're going
+to talk about the how to estimate the parameters
+of a mixture model. So let's first look
+at our motivation for using a mixture model, and we hope to effect out the background words from
+the topic word distribution. So the idea is to assume that the text data actually
+contain two kinds of words. One kind is from
+the background here, so the "is", "we" etc. The other kind is from our topic word distribution
+that we're interested in. So in order to solve
+this problem of factoring out background words, we can set up our mixture
+model as follows. We are going to assume that we already know the parameters of all the values for all the parameters in
+the mixture model except for the word distribution of
+Theta sub d which is our target. So this is a case of
+customizing probably some model so that we embedded the unknown variables
+that we are interested in, but we're going to
+simplify other things. We're going to assume
+we have knowledge about others and this is a powerful way of customizing a model
+for a particular need. Now you can imagine, we
+could have assumed that we also don't know the
+background word distribution, but in this case,
+our goal is to affect out precisely those high probability
+in the background words. So we assume the background
+model is already fixed. The problem here is, how can we adjust the Theta sub
+d in order to maximize the probability of
+the observed document here and we assume all the
+other parameters are known? Now, although we
+designed the modal heuristically to try to factor out these
+background words, it's unclear whether if we use maximum
+likelihood estimator, we will actually end up having
+a word distribution where the common words like "the" will be indeed having smaller
+probabilities than before. So now, in this case, it turns out that
+the answer is yes. When we set up the probabilistic
+modeling this way, when we use maximum
+likelihood estimator, we will end up having
+a word distribution where the common words
+would be factored out by the use of
+the background distribution. So to understand why this is so, it's useful to examine
+the behavior of a mixture model. So we're going to look
+at a very simple case. In order to understand some interesting behaviors
+of a mixture model, the observed patterns
+here actually are generalizable to mixture
+model in general, but it's much easier to
+understand this behavior when we use a very simple case
+like what we're seeing here. So specifically in this case, let's assume that
+the probability of choosing each of the two models
+is exactly the same. So we're going to flip a fair coin to decide
+which model to use. Furthermore, we are going
+to assume there are precisely to words,
+"the" and "text." Obviously, this is
+a very naive oversimplification of the actual text, but again, it is useful to examine the behavior
+in such a special case. So we further assume that, the background model gives
+probability of 0.9 to the word "the" and "text" 0.1. Now, let's also assume that
+our data is extremely simple. The document has just two words
+"text" and then "the." So now, let's write down the likelihood function
+in such a case. First, what's the probability of "text" and what's the
+probability of "the"? I hope by this point, you will be able
+to write it down. So the probability of "text" is basically a sum of
+two cases where each case corresponds to each of the water distribution and it accounts for the two ways
+of generating text. Inside each case, we have the probability of choosing
+the model which is 0.5 multiplied by the probability of observing "text"
+from that model. Similarly, "the" would
+have a probability of the same form just as it was different exactly
+probabilities. So naturally,
+our likelihood function is just the product of the two. So it's very easy to see that, once you understand
+what's the probability of each word and which
+is also why it's so important to understand what's exactly the probability of observing each word from
+such a mixture model. Now, the interesting
+question now is, how can we then optimize
+this likelihood? Well, you will notice that, there are only two variables. They are precisely
+the two probabilities of the two words
+"text" and "the" given by Theta sub d. This is
+because we have assumed that, all the other
+parameters are known. So now, the question is
+a very simple algebra question. So we have a simple expression with two variables and we hope to choose the values of these two variables to
+maximize this function. It's exercises that we have seen some simple
+algebra problems, and note that the two
+probabilities must sum to one. So there's some constraint. If there were
+no constraint of course, we will set both probabilities to their maximum value which
+would be one to maximize this, but we can't do that because "text" and
+"the" must sum to one. We can't give those a
+probability of one. So now the question is, how should we allocate
+the probability in the mass between the two words?
+What do you think? Now, it will be useful to look at this formula for
+moment and to see intuitively what
+we do in order to set these probabilities to maximize the value
+of this function. If we look into this further, then we'll see
+some interesting behavior of the two component
+models in that, they will be
+collaborating to maximize the probability of
+the observed data which is dictated by the maximum
+likelihood estimator, but they're also
+competing in some way. In particular, they
+would be competing on the words and they
+will tend to bet high probabilities on
+different words to avoid this competition in some sense or to gain advantage
+in this competition. So again, looking at this
+objective function and we have a constraint on
+the two probabilities, now if you look at
+the formula intuitively, you might feel that
+you want to set the probability of "text" to be somewhat larger than "the". This intuition can
+be well-supported by mathematical fact which is, when the sum of
+two variables is a constant then the product of them which is maximum
+then they are equal, and this is a fact that
+we know from algebra. Now, if we plug that in, we will would mean
+that we have to make the two probabilities equal. When we make them equal
+and then if we consider the constraint that we can
+easily solve this problem, and the solution is the
+probability of "text" would be 0.9 and probability
+of "the" is 0.1. As you can see indeed, the probability of text
+is not much larger than probability of "the" and this is not the case when we
+have just one distribution. This is clearly because of the use of the
+background model which assign a very high probability to "the" low
+probability to "text". If you look at the equation, you will see obviously some interaction of
+the two distributions here. In particular, you will see in order to make them equal and then the probability assigned
+by Theta sub d must be higher for a word that has a smaller probability
+given by the background. This is obvious from
+examining this equation because "the" background part is weak for "text" it's a small. So in order to
+compensate for that, we must make the probability
+of "text" that's given by Theta sub d somewhat larger so that the two sides
+can be balanced. So this is in fact a very general behavior
+of this mixture model. That is, if one distribution assigns a high probability
+to one word than another, then the other distribution would tend to do the opposite. Basically, it would discourage other distributions to do the same and this is to
+balance them out so that, we can account for all words. This also means that, by using a background
+model that is fixed to assign high probabilities
+to background words, we can indeed encourage the unknown topic
+word distribution to assign smaller probabilities
+for such common words. Instead, put more probability
+mass on the content words that cannot be explained well by the background
+model meaning that, they have a very
+small probability from the background
+model like "text" here.

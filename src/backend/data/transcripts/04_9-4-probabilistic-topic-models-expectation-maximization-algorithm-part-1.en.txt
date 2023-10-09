@@ -1,0 +1,132 @@
+This lecture is about the expectation-maximization
+algorithm, also called the EM algorithm. In this lecture, we're
+going to continue the discussion of
+probabilistic topic models. In particular, we're going to
+introduce the EM algorithm, which is a family of
+useful algorithms for computing the maximum likelihood estimate
+of mixture models. So this is now familiar scenario of
+using a two component, the mixture model, to try to factor out
+the background words from one topic word
+of distribution here. So we're interested in
+computing this estimate, and we're going to try to adjust these probability values to maximize the probability
+of the observed document. Note that we assume that all the other parameters are known. So the only thing unknown is the word probabilities
+given by theta sub. In this lecture, we're
+going to look into how to compute this maximum
+likelihood estimate. Now, let's start with the idea of separating the words in
+the text data into two groups. One group would be explained
+by the background model. The other group would
+be explained by the unknown topic
+word distribution. After all, this is
+the basic idea of mixture model. But suppose we actually know which word is from
+which distribution? So that would mean, for example, these words the, is, and we are known to be from this background
+word distribution. On the other hand, the
+other words text, mining, clustering etc are known to be from the topic word distribution. If you can see the color, then these are shown in blue. These blue words are then assumed that to be from
+the topic word distribution. If we already know how
+to separate these words, then the problem of estimating the word distribution
+would be extremely simple. If you think about
+this for a moment, you'll realize that, well, we can simply take
+all these words that are known to be from this word distribution theta sub d
+and normalize them. So indeed this problem would be very easy to solve if we had known which words are from which a distribution precisely, and this is in fact making this model no
+longer a mixture model because we can already observe which distribution has been used to generate
+which part of the data. So we actually go back to the single word
+distribution problem. In this case let's call these words that are
+known to be from theta d, a pseudo document of d prime, and now all we need to
+do is just normalize these words counts
+for each word w_i. That's fairly straightforward. It's just dictated by the
+maximum likelihood estimator. Now, this idea however
+doesn't work because we in practice don't really know which word is from
+which distribution, but this gives us
+the idea of perhaps we can guess which word is
+from which it is written. Specifically given
+all the parameters, can we infer the distribution
+a word is from. So let's assume that we actually know tentative probabilities for these words in theta sub d. So now all the parameters are known for this mixture model, and now let's consider
+a word like a "text". So the question is, do you
+think "text" is more likely having been generated from theta sub d or from
+theta sub of b? So in other words,
+we want to infer which distribution has been
+used to generate this text. Now, this inference process is a typical Bayesian inference
+situation where we have some prior about
+these two distributions. So can you see what
+is our prior here? Well, the prior here is the probability of
+each distribution. So the prior is given by
+these two probabilities. In this case, the prior is saying that each model
+is equally likely, but we can imagine perhaps a
+different prior is possible. So this is called a prior
+because this is our guess of which distribution has
+been used to generate a word before we even
+off reserve the word. So that's why we
+call it the prior. So if we don't observe the word, we don't know what word
+has been observed. Our best guess is to say
+well, they're equally likely. All right. So it's
+just flipping a coin. Now in Bayesian inference we
+typically learn with update our belief after we have
+observed the evidence. So what is the evidence here? Well, the evidence
+here is the word text. Now that we know we're
+interested in the word text. So text that can be
+regarded as evidence, and if we use Bayes rule to combine the
+prior and the data likelihood, what we will end up
+with is to combine the prior with the likelihood
+that you see here, which is basically
+the probability of the word text from
+each distribution. We see that in both cases
+the text is possible. Note that even in the background
+it is still possible, it just has a very
+small probability. So intuitively what would
+be your guess in this case. Now if you're like many others, you are guess text
+is probably from theta sub d. It's more likely
+from theta sub d. Why? You will probably see that
+it's because text that has a much higher probability
+here by the theta sub d, then by the background model which has a very
+small probability. By this we're going to say, well, text is more likely from theta sub d. So you see our guess of which
+distribution has been used to generate
+the text would depend on how high the probability of the text is in
+each word distribution. We can do, tend to guess the distribution that gives us a word a higher probability, and this is likely to
+maximize the likelihood. So we're going to choose a word that has
+a higher likelihood. So in other words,
+we're going to compare these two probabilities of the word given by
+each distributions. But our guess must also
+be affected by the prior. So we also need to
+compare these two priors. Why? Because imagine if we
+adjust these probabilities, we're going to say
+the probability of choosing a background model is
+almost 100 percent. Now, if you have that kind
+of strong prior, then that would
+affect your guess. You might think,
+well, wait a moment, maybe text could have been
+from the background as well. Although the probability
+is very small here, the prior is very high. So in the end, we have
+to combine the two, and the base formula provides us a solid and principled way of making this kind of
+guess to quantify that. So more specifically, let's think about
+the probability that this word has been generated in fact from from theta sub d. Well, in order for texts
+to be generated from theta sub d two things
+must happen. First, the theta sub d
+must have been selected, so we have the selection
+probability here. Secondly, we also have to actually have observed text
+from the distribution. So when we multiply
+the two together, we get the probability
+that text has in fact been generated from
+theta sub d. Similarly, for the background model, the probability of generating text is another product
+of a similar form. Now, we also introduced the latent variable
+z here to denote whether the word is from
+the background or the topic. When z is zero, it means it's from the topic
+theta sub d. When it's one, it means it's from
+the background theta sub b. So now we have the probability that text
+is generated from each. Then we can simply normalize them to have an estimate
+of the probability that the word text is from theta sub d or
+from theta sub b. Then equivalently, the
+probability that z is equal to zero given that
+the observed evidence is text. So this is application
+of Bayes rule. But this step is very
+crucial for understanding the EM algorithm because
+if we can do this, then we would be able to first initialize the parameter values
+somewhat randomly, and then we're going to take
+a guess of these z values. Which distributing has been
+used to generate which word, and the initialized
+the parameter values would allow us to have a complete specification of
+the mixture model which further allows us to
+apply Bayes rule to infer which distribution is more
+likely to generate each word. This prediction
+essentially helped us to separate the words from
+the two distributions. Although we can't
+separate them for sure, but we can separate them
+probabilistically as shown here.
