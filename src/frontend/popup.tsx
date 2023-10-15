@@ -26,16 +26,7 @@ function IndexPopup() {
   
   if (currentUrl.includes("coursera.org")) {
     return (
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          padding: 16,
-          width: "250px",
-          textAlign: "center",
-          backgroundColor: "lightgreen",
-          borderRadius: "5px"
-        }}>
+      <div className={style.div}>
         <h1 className={style.h1}>
           Welcome to CourseBuddy, {currentUsername}!
         </h1>
@@ -55,6 +46,7 @@ function IndexPopup() {
           padding: 16,
           backgroundColor: "lightgreen",
           width: "250px",
+          borderRadius: "5px"
         }}>
         <h2 className={style.h2}>
           This extension only works with Coursera!
