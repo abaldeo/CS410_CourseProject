@@ -28,7 +28,9 @@
       "https://*/*"
     ],
     "permissions": [
-      "tabs"
+      "tabs",
+      "identity",
+      "identity.email"
     ]
   }
 }

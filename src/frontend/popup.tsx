@@ -1,30 +1,48 @@
 import { useState, useEffect } from "react"
+import * as style from "./styles.module.css"
 
 function IndexPopup() {
   const [currentUrl, setCurrentUrl] = useState<string>("")
+  const [currentUsername, setCurrentUsername] = useState<string>("")
+
   const getCurrentUrl = async () => {
     const [tab] = await chrome.tabs.query({active: true, currentWindow: true})
     setCurrentUrl(tab.url)
   }
 
+  const getCurrentUsername = async () => {
+    chrome.identity.getProfileUserInfo(function(info) {
+      setCurrentUsername(info.email.substring(0, info.email.indexOf("@")))
+      if (info.email.length == 0) {
+        setCurrentUsername("Anon")
+      }
+    })
+  }
+
   useEffect(() => {
-    getCurrentUrl()
-  }, [currentUrl])
+    getCurrentUrl(),
+    getCurrentUsername()
+  }, [currentUrl, currentUsername])
   
   if (currentUrl.includes("coursera.org")) {
     return (
       <div
         style={{
           display: "flex",
-          flexDirection: "row",
-          padding: 16
+          flexDirection: "column",
+          padding: 16,
+          width: "250px",
+          textAlign: "center",
+          backgroundColor: "lightgreen",
+          borderRadius: "5px"
         }}>
-        <h2>
-          Welcome to CourseBuddy!
-        </h2>
-        <a href="https://docs.plasmo.com" target="_blank">
-          View Docs
-        </a>
+        <h1 className={style.h1}>
+          Welcome to CourseBuddy, {currentUsername}!
+        </h1>
+        <button
+          className={style.button}
+          value="Generate Summary">Generate Summary
+        </button>
       </div>
     )
   }
@@ -33,15 +51,14 @@ function IndexPopup() {
       <div
         style={{
           display: "flex",
-          flexDirection: "row",
-          padding: 16
+          flexDirection: "column",
+          padding: 16,
+          backgroundColor: "lightgreen",
+          width: "250px",
         }}>
-        <h2>
+        <h2 className={style.h2}>
           This extension only works with Coursera!
         </h2>
-        <a href="https://docs.plasmo.com" target="_blank">
-          View Docs
-        </a>
       </div>
     )
   }
