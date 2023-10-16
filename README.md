@@ -13,7 +13,7 @@ To run a script using pdm, follow these steps:
 2. Change the current directory to `src/backend` of your project.
    `cd src/backend`
 4. Run the script using pdm
-   `pdm run app/main.py`
+   `pdm run python app/main.py`
 
 
 
