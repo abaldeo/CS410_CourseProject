@@ -1,0 +1,42 @@
+[project]
+name = "CourseBuddyAI"
+version = "0.1.0"
+description = ""
+authors = [
+    {name = "Avinash B.", email = "abaldeo@users.noreply.github.com"},
+]
+dependencies = [
+    "llama-hub>=0.0.34",
+    "g4f>=0.1.4.5",
+    "gptcache>=0.1.42",
+    "python-dotenv>=1.0.0",
+    "tiktoken>=0.5.1",
+    "langchain-g4f @ git+https://github.com/MIDORIBIN/langchain-gpt4free.git",
+    "fastapi>=0.103.2",
+    "uvicorn>=0.23.2",
+    "alembic>=1.4.3",
+    "Authlib>=0.14.3",
+    "httpx>=0.15.5",
+    "ipython>=7.31.1",
+    "itsdangerous>=1.1.0",
+    "Jinja2>=2.11.3",
+    "psycopg2>=2.8.6",
+    "pytest>=6.1.0",
+    "requests>=2.26.0",
+    "SQLAlchemy>=1.3.19",
+    "passlib>=1.7.2",
+    "bcrypt>=3.2.0",
+    "sqlalchemy-utils>=0.36.8",
+    "python-multipart>=0.0.5",
+    "pyjwt>=1.7.1",
+    "openai>=0.27.6",
+    "python-dotenv>=1.0.0",
+]
+requires-python = ">=3.11"
+readme = "../../README.md"
+license = {text = "MIT"}
+
+[build-system]
+requires = ["pdm-backend"]
+build-backend = "pdm.backend"
+ 
