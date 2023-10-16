@@ -16,22 +16,24 @@ To run a script using pdm, follow these steps:
    `pdm run python app/main.py`
 
 To add new backend service, follow these steps:
-   1. Add the following files under `src/backend/app/api/api_v1/services` then add router to `__init__.py` in services folder
-   2. core.py <- define logic
-   3. service.py <- define endpoint
-   4. To test service independently, define main.py & run
+   1. Add new service folder & the following files under `src/backend/app/api/api_v1/services`
+      ```
+      │       ├── api
+      │       │   ├── api_v1
+      │       │   │   └── services
+      │       │   │   |  └── service_name
+      │       │   │   |  |   └── __init__.py  # export router (critical)
+      │       │   │   |  |   └── core.py # define logic
+      │       │   │   |  |   └── service.py # define routes
+      │       │   │   |  |   └── main.py # use to test locally
+      ```
+   2. then add router to `__init__.py` in top-level services folder
+      ```
+      from .service_name import service_name_router # exported router name
+      service_router.include_router(service_name_router)      
+      ```
+   4. To test service independently, update main.py & run
       ```pdm run python service_name/main.py```
-      
-```
-│       ├── api
-│       │   ├── api_v1
-│       │   │   └── services
-│       │   │   |  └── service_name
-│       │   │   |  |   └── core.py 
-│       │   │   |  |   └── service.py
-│       │   │   |  |   └── main.py 
-```
-
 
 ## Features
 
