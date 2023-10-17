@@ -1,0 +1,197 @@
+In this lecture, we continue discussing Paradigmatical
+Relation Discovery. Earlier we introduced
+a method called Expected Overlap of
+Words in Context. In this method, we
+represent each context by a word vector that represents the probability of a
+word in the context. We measure the similarity
+by using the.product, which can be interpreted as
+the probability that two randomly picked words from the two contexts are identical. We also discussed
+the two problems of this method. The first is that
+it favors matching one frequent term very well over matching more distinct terms. It put too much emphasis on
+matching one term very well. The second is that it
+treats every word equally. Even a common word like
+the will contribute equally as content
+word like eats. So now we are going to talk about how
+to solve these problems. More specifically, we're
+going to introduce some retrieval heuristics
+used in text retrieval. These heuristics can effectively
+solve these problems, as these problems also
+occur in text retrieval when we match a query that
+though with a document vector. So to address the first problem, we can use a sublinear
+transformation of tone frequency. That is, we don't have to use the raw frequency count of a term to represent the context. We can transform
+it into some form that wouldn't emphasize so
+much on the raw frequency. To address the
+synchronous problem, we can put more weight
+on rare terms. That is we can reward
+matching a real-world. This heuristic is called the IDF term weighting in text retrieval. IDF stands for
+Inverse Document Frequency. So now, we're going to talk about the two heuristics
+in more detail. First let's talk about
+the TF Transformation. That is to convert
+the raw count of a word in the document
+into some weight that reflects our belief about how important
+this word in the document. So that will be
+denoted by TF of w,d. That's shown in the y-axis. Now, in general, there are
+many ways to map that. Let's first look at
+the simple way of mapping. In this case, we're
+going to say, well, any non-zero counts
+will be mapped to one and the zero count
+will be mapped to zero. So with this mapping all the frequencies will be mapped to only two
+values; zero or one. The mapping function is shown
+here as a flat line here. Now, this is naive because it's not
+the frequency of words. However, this actually
+has the advantage of emphasizing matching all
+the words in the context. So it does not allow a frequency of word to
+dominate the matching. Now, the approach
+that we have taken earlier in the expected
+overlap count approach, is a linear transformation. We basically, take
+y as the same as x. So we use the raw count
+as a representation. That created the problem that we just talked about namely; it emphasize too much on just
+matching one frequent term. Matching one frequent term
+can contribute a lot. So we can have a lot of other interesting
+transformations in between the two extremes, and they generally form
+a sublinear transformation. So for example,
+one possibility is to take logarithm of the raw count, and this will give us curve
+that looks like this, that you are seeing here. In this case, you can see
+the high frequency counts. The high counts are
+penalize a little bit, so the curve is a sublinear
+curve and it brings down the weight of
+those really high counts. This is what we want,
+because it prevents that terms from dominating
+the scoring function. Now, there is also another interesting
+transformation called a BM25 transformation which has been shown to be very
+effective for retrieval. In this transformation, we have a form that looks like this. So it's k plus one multiplied
+by x divided by x plus k, where k is a parameter, x is the count, the raw count of a word. Now, the transformation
+is very interesting in that it can actually go from one extreme to the other
+extreme by varying k. It also interesting
+that it has upper bound, k plus one in this case. So this puts
+a very strict constraint on high frequency terms, because their weight would
+never exceed k plus one. As we vary k, if we can
+simulate the two extremes. So when k is set to zero, we roughly have the 0,1 vector. Whereas when we set k
+to a very large value, it will behave more like
+the linear transformation. So this transformation
+function is by far the most effective
+transformation function for text retrieval and it also makes sense for our problem setup. So we just talked about how
+to solve the problem of overemphasizing a frequency term Now let's look at
+the second problem, and that is how we can
+penalize popular terms. Matching "the" is not surprising, because "the" occurs everywhere. But matching "eats"
+would count a lot. So how can we address
+that problem? Now in this case, we can
+use the IDF weighting. That's commonly
+used in retrieval. IDF stands for
+Inverse Document Frequency. Document frequency
+means the count of the total number of documents that contain
+a particular word. So here we show that the IDF
+measure is defined as a logarithm function
+of the number of documents that match a
+term or document frequency. So K is the number of
+documents containing word or document frequency and M here is the total number of
+documents in the collection. The IDF function is giving
+a higher value for a lower K, meaning that it
+rewards rare term. The maximum value is
+log of M plus one. That's when the word occurred
+just once in a context. So that's a very rare term, the rare is term in
+the whole collection. The lowest value you can
+see here is when K reaches its maximum which would be M. So that would be
+a very low value, close to zero in fact. So this of course measure is used in search where we
+naturally have a collection. In our case, what would
+be our collection? Well, we can also
+use the context that we can collect all the words
+as our collection. That is to say, a word that's popular in
+the collection in general, would also have a low IDF. Because depending on the dataset, we can construct the context
+vectors in different ways. But in the end if a term is very frequent in
+the original dataset, then it will still be frequent in the collective
+context documents. So how can we add
+these heuristics to improve our similarity function? Well, here's one way
+and there are many other ways
+that are possible. But this is a reasonable way, where we can adapt
+the BM25 retrieval model for paradigmatical
+relation mining. In this case, we define the
+document vector as containing elements representing
+normalized BM25 values. So in this
+normalization function, we take sum over all
+the words and we normalize the weight of
+each word by the sum of the weights of all the words. This is to again ensure all the xi's will sum to
+one in this vector. So this would be very similar
+to what we had before, in that this vector is actually something similar
+to a word distribution, all the xi's will sum to one. Now, the weight of BM25 for
+each word is defined here. If you compare this with
+our old definition where we just have a normalized count
+of this one, right? So we only have this one
+and the document lens or the total counts of words in
+that context to document, and that's what we had before. But now with the BM25
+transformation, we introduced something else. First, of course,
+this extra occurrence of this count is just to achieve the sub-linear
+normalization. But we also see we introduced
+the parameter, k, here, and this parameter is
+generally a non-active number, although zero is also possible. But this controls
+the upper bound, and also controls to what extent it simulates the
+linear transformation. So this is one parameter, but we also see there is
+another parameter here, b, and this would be
+within zero and one. This is a parameter to
+control lens normalization. In this case, the normalization formula has a average document lens here. This is computed up
+by taking the average of the lenses of all the
+documents in the collection. In this case, all the lenses of all the context of documents
+that we're considering. So this average documents will be a constant for
+any given collection. So it actually is only affecting the effect
+of the parameter, b, here because
+this is a constant. But I kept it here because
+it's a constant that's used for in retrieval where it would give us a stabilized
+interpretation of parameter, b. But for our purpose, this will be a constant so
+it would only be affecting the lens normalization
+together with parameter, b. Now, with this definition then, we have a new way to define
+our document of vectors, and we can compute
+the vector d2 in the same way. The difference is that the high-frequency terms will now have a somewhat lower weights. This would help us control the inference of
+these high-frequency terms. Now, the idea can be added
+here in the scoring function. That means we'll
+introduce a weight for matching each term. So you may recall
+this sum indicates all the possible words
+that can be overlap between the two contexts. The x_i and the y_i
+are probabilities of picking the word
+from both contexts. Therefore, it
+indicates how likely we'll see a match on this word. Now, IDF would give us the importance of
+matching this word. A common word will be worth
+less than a rare word. So we emphasize more on
+matching rare words now. So with this modification, then the new function will likely address
+those two problems. Now, interestingly
+we can also use this approach to discover
+syntagmatic relations. In general, when we re-brand a context with a term vector, we would likely see some terms have high weights and other terms have low weights. Depending on how we assign
+weights to these terms, we might be able to
+use these weights to discover the words that are strongly associated with the candidate word
+in the context. So let's take a look at the term vector in
+more detail here. We have each x_i defined as the normalized
+weight of BM25. Now, this weight alone only reflects how frequent the word
+occurs in the context. But we can't just say any frequent term in the context that would
+be correlated with the candidate word because many common words like 'the' will occur frequently in
+all the context. But if we apply IDF
+weighting as you see here, we can then re-weight
+these terms based on IDF. That means the words that are common like 'the'
+will get penalized. So now the highest
+weighted terms will not be those common terms because
+they have lower IDFs. Instead, those terms would be the terms that are
+frequent in the context, but not frequent
+in the collection. So those are clearly the words
+that tend to occur in the context of the candidate
+word, for example, cat. So for this reason, the highly weighted terms in
+this idea of weighted vector can also be assumed to be candidates for
+syntagmatic relations. Now, of course, this is
+only a by-product of our approach for discovering
+paradigmatic relations. In the next lecture, we're
+going to talk more about how to discover
+syntagmatic relations. But it clearly shows the relation between discovering
+the two relations. Indeed they can be discovered in a joint manner by leveraging
+such associations. So to summarize,
+the main idea for discovering paradigmatic relations is to collect the context of a candidate word to
+form a pseudo document. This is typically represented
+as a bag of words. Then compute the similarity of the corresponding
+context documents of two candidate words. Then we can take
+the highly similar word pairs, and treat them as having
+paradigmatic relations. These are the words that
+share similar contexts. There are many different ways to implement this general idea. We just talked about
+some of the approaches. More specifically, we
+talked about using text retrieval models to help us design effective
+similarity function to compute the
+paradigmatic relations. More specifically, we have used the BM25 and IDF weighting to discover
+paradigmatic relation. These approaches also represent the state of the art in
+text retrieval techniques. Finally, syntagmatic relations
+can also be discovered as a by-product when we discover
+paradigmatic relations.

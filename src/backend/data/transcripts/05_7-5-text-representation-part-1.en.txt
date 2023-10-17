@@ -1,0 +1,126 @@
+This lecture is about the
+textual representation. In this lecture, we are going to discuss textual
+representation, and discuss how natural
+language processing can allow us to represent text
+in many different ways. Let's take a look at this
+example sentence again. We can represent this sentence
+in many different ways. First, we can always represent such a sentence
+as a string of characters. This is true for
+all the languages when we store them
+in the computer. When we store a natural
+language sentence as a string of characters, we have perhaps the most general
+way of representing text since we always use this approach to
+represent any text data. But unfortunately, using
+such a representation will not help us to do semantic analysis, which is often needed for many applications
+of text mining. The reason is because we're
+not even recognizing words. So as a string, we're going to keep
+all the spaces and these ASCII symbols. We can perhaps count what's the most frequent character
+in English text, or the correlation
+between those characters, but we can't really
+analyze semantics. Yet, this is the most
+general way of representing text because we can use this to represent any
+natural language text. If we try to do a little bit more natural
+language processing by doing word segmentation, then we can obtain a
+representation of the same text, but in the form of a
+sequence of words. So here we see that
+we can identify words like a dog is chasing etc. Now with this level
+of representation, we certainly can do
+a lot of things, and this is mainly because
+words are the basic units of human communication
+in natural language, so they are very powerful. By identifying words, we can for example easily count what are the most frequent words in this document or in
+the whole collection etc. These words can be used to form topics when we combine
+related words together, and some words are positive, some words negative, so we can also do sentiment analysis. So representing text data
+as a sequence of words opens up a lot of interesting
+analysis possibilities. However, this level of representation is slightly
+less general than string of characters because in
+some languages such as Chinese, it's actually not
+that easy to identify all the word boundaries
+because in such a language, you see text as a sequence of characters with
+no space in between. So you'll have to rely on some special techniques
+to identify words. In such a language,
+of course then, we might make mistakes
+in segmenting words. So the sequence of
+words representation is not as robust as
+string of characters. But in English, it's very easy to obtain this level
+of representation, so we can do that all the time. Now, if we go further to do naturally
+language processing, we can add a part of speech tags. Now once we do that, we can count, for example, the most frequent
+nouns or what kind of nouns are associated with
+what kind of verbs etc. So this opens up a little bit more
+interesting opportunities for further analysis. Note that I use a plus sign
+here because by representing text as a sequence
+of part of speech tags, we don't necessarily replace the original word
+sequence written. Instead, we add this as an additional way of
+representing text data, so that now the data is
+represented as both a sequence of words and a sequence
+of part of speech tags. This enriches the
+representation of text data, and thus also enables
+more interesting analysis. If we go further, then we'll
+be pausing the sentence often to obtain
+a syntactic structure. Now this of course, further open up
+a more interesting analysis of, for example, the writing styles or
+correcting grammar mistakes. If we go further for
+semantic analysis, then we might be able to
+recognize dog as an animal, and we also can recognize
+a boy as a person, and playground as a location. We can further analyze
+their relations, for example, dog is chasing the boy and
+the boy is on the playground. Now this will add
+more entities and relations through
+entity relation recreation. At this level, then we can do even more
+interesting things. For example, now we
+can count easily the most frequent person that's mentioning this whole collection
+of news articles, or whenever you
+mention this person, you also tend to see mentioning
+of another person etc. So this is a very
+useful representation, and it's also related to the knowledge graph that
+some of you may have heard of that Google is doing as a more semantic way of
+representing text data. However, it's also less robust
+than sequence of words or even syntactical analysis
+because it's not always easy to identify all the entities with
+the right types, and we might make mistakes, and relations are
+even harder to find, and we might make mistakes. So this makes this level of
+representation less robust, yet it's very useful. Now if we move further
+to logical condition, then we can have predicates
+and even inference rules. With inference rules, we can infer interesting derived
+facts from the text, so that's very useful. But unfortunately,
+at this level of representation is even less robust and we can make mistakes and we can't do that all the time for
+all kinds of sentences. Finally, speech acts would
+add a yet another level of repetition of the intent
+of saying this sentence. So in this case, it might be a request. So knowing that would
+allow us to analyze even more interesting
+things about this observer or the author
+of this sentence. What's the intention
+of saying that? What's scenarios? What kind
+of actions would be made? So this is another level of analysis that would
+be very interesting. So this picture shows
+that if we move down, we generally see
+more sophisticated natural language processing
+techniques to be used. Unfortunately,
+such techniques would require more human effort, and they are less accurate. That means there are mistakes. So if we add an texts that are at the levels that are representing deeper
+analysis of language, then we have to
+tolerate the errors. So that also means it's
+still necessary to combine such deep analysis with
+shallow analysis based on, for example, sequence of words. On the right side, you'll see the arrow points
+down to indicate that. As we go down, we are representation
+of text is closer to knowledge representation
+in our mind, and need for solving
+a lot of problems. Now this is desirable because as we can represent text at
+the level of knowledge, we can easily extract
+the knowledge. That's the purpose
+of text-mining. So there is a trade-off here between doing
+a deeper analysis that might have errors but would give us direct knowledge that
+can be extracted from text. Doing shallow analysis, which is more robust but
+wouldn't actually give us the necessary deeper
+representation of knowledge. I should also say that
+text data are generated by humans and are meant to
+be consumed by humans. So as a result, in
+text data analysis, text-mining humans play
+a very important role, they are always in the loop. Meaning that we should optimize the collaboration of
+humans and computers. So in that sense, it's okay that computers
+may not be able to have compute accurately
+representation of text data, and the patterns
+that are extracted from text data can be
+interpreted by humans, and humans can
+guide the computers to do more accurate analysis
+by annotating more data, by providing features
+to guide a machine learning programs to make
+them work more effectively.
