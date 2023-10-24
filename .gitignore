@@ -90,11 +90,6 @@ share/python-wheels/
 *.egg-info/
 .installed.cfg
 *.egg
-# I added these to push up a commit
-.pdm-python
-env
-pdm.lock
-pyproject.toml
 
 MANIFEST
 
