@@ -18,10 +18,10 @@ async def uploadTranscript(userId: str, courseName: str, videoName: str, transcr
 async def uploadSlides(uploadModel: UploadModel):
     return uploadModel
 
-@router.get("/getTranscript")
+@router.get("/transcripts/{courseName}/{videoName}")
 async def getTranscript(courseName: str, videoName: str):
     return retrieve_transcript(courseName, videoName)
 
-@router.get("/slides/{courseName}")
+@router.get("/slides/{courseName}/{slideName}")
 async def getSlides(uploadModel: UploadModel):
     return uploadModel.fileObject
