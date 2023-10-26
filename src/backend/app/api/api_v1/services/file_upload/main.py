@@ -3,9 +3,8 @@ from fastapi import APIRouter
 import uvicorn
 
 from app.core import config
-# from .service import router
-# from fastapi import APIRouter
-from pydantic import BaseModel
+from .service import router
+
 
 router = APIRouter()
 

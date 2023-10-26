@@ -1,5 +1,6 @@
 from fastapi import APIRouter
 from .core import upload_transcript, retrieve_transcript
+from pydantic import BaseModel
 router = r = APIRouter()
 
 class UploadModel(BaseModel):
