@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-from .core import upload_transcript, retrieve_transcript
+from .core import upload_transcript, retrieve_transcript, upload_transcript_test
 from pydantic import BaseModel
 router = r = APIRouter()
 
@@ -26,3 +26,7 @@ async def getTranscript(courseName: str, videoName: str):
 @router.get("/slides/{courseName}/{slideName}")
 async def getSlides(uploadModel: UploadModel):
     return uploadModel.fileObject
+
+@router.post("/uploadTranscriptTest")
+async def uploadTranscriptTester():
+    return upload_transcript_test()

@@ -1,7 +1,7 @@
 import boto3
 import botocore
 import os
-
+import requests
 
 # session = boto3.session.Session()
 # client = session.client('s3',
@@ -14,8 +14,8 @@ import os
 # Helper function to upload a transcript
 def upload_transcript(course_name, transcript_name, transcript_text):
     print("============================================")
-    print(os.getenv('AWS_REGION_NAME'))
-    print(os.getenv('S3_ENDPOINT_URL'))
+    print(os.getenv('REGION_NAME'))
+    print(os.getenv('ENDPOINT_URL'))
     print(os.getenv('AWS_ACCESS_KEY_ID'))
     print(os.getenv('AWS_SECRET_ACCESS_KEY'))
     print("============================================")
@@ -96,3 +96,31 @@ def retrieve_transcript(course_name, transcript_name):
 #     except Exception as e:
 #         return f"Error: Transcript {transcript_name} for course {course_name} not found."
     
+#Uploads all text files in a directory 
+# !! Not working yet !!
+def upload_transcript_test():
+    directory = "/workspaces/CS410_CourseProject/src/backend/data/transcripts"
+    endpoint_url = "https://cuddly-space-cod-4vgggj7vpg53jg65-8000.app.github.dev/api/docs#/file_upload/uploadTranscriptTester_api_v1_file_upload_uploadTranscriptTest_post"  # Replace with your actual endpoint URL
+
+    for filename in os.listdir(directory):
+        f = os.path.join(directory, filename)
+        # Check if it is a file and ends with '.txt'
+        if os.path.isfile(f) and filename.endswith('.txt'):
+            with open(f, 'r') as text_file:
+                text = text_file.read()
+
+            # Set up the data to be sent in the POST request
+            data = {
+                "course_name": "CS411",  # Replace with your course name
+                "transcript_name": filename,
+                "transcript_text": text
+            }
+
+            # Send the POST request to the FastAPI endpoint
+            response = requests.post(endpoint_url, data=data)
+
+            # Check the response
+            if response.status_code == 200:
+                print(f"Transcript {filename} uploaded successfully.")
+            else:
+                print(f"Failed to upload transcript {filename}. Status code: {response.status_code}")
