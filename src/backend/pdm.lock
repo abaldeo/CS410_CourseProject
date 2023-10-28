@@ -3,10 +3,9 @@
 
 [metadata]
 groups = ["default"]
-cross_platform = true
-static_urls = false
-lock_version = "4.3"
-content_hash = "sha256:695a03537612932759149f35985b3e53cc309f029edcc5ebe5afa1b4f8a35a49"
+strategy = ["cross_platform"]
+lock_version = "4.4"
+content_hash = "sha256:a2672563b7224c13384d53d4986f341bd1805d43fbd215b1b7415e748f41f21a"
 
 [[package]]
 name = "aiohttp"
