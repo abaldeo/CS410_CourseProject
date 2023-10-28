@@ -20,6 +20,7 @@ from langchain.storage.redis import RedisStore
 from langchain.embeddings import CacheBackedEmbeddings
 from upstash_redis import Redis
 import redis
+from pydantic import BaseModel
 
 
 
@@ -29,23 +30,26 @@ router = r = APIRouter()
 
 REDIS_URL = os.getenv("UPSTASH_REDIS_REST_URL")
 REDIS_TOKEN = os.getenv("UPSTASH_REDIS_REST_TOKEN")
+REDIS_HOST = os.getenv("UPSTASH_REDIS_HOST")
+REDIS_PORT = os.getenv("UPSTASH_REDIS_PORT")
+REDIS_PASSWD = os.getenv("UPSTASH_REDIS_PASSWORD")
 # print(REDIS_URL)
 # print(REDIS_TOKEN)
-redis_client = Redis(url=REDIS_URL, token=REDIS_TOKEN, rest_retries=5, rest_retry_interval=3, allow_telemetry=False)
+# redis_client = Redis(url=REDIS_URL, token=REDIS_TOKEN, rest_retries=5, rest_retry_interval=3, allow_telemetry=False)
 redis_instance = redis.Redis(
-  host='us1-viable-civet-41613.upstash.io',
-  port=41613,
-  password='63099f9a0987407a9fb00fb8890707d3'
+  host=REDIS_HOST, 
+  port=REDIS_PORT,
+  password=REDIS_PASSWD 
 )
 
 
 REDIS_STORE  = RedisStore(client=redis_instance, ttl=None, namespace="embedding_service")
 
 MODEL_NAME = os.getenv("MODEL_NAME")
-S3_BUCKET_NAME = os.getenv("S3_BUCKET_NAME")
+S3_BUCKET_NAME = os.getenv("S3_BUCKET_NAME", "coursebuddy")
 EMBEDDING_MODEL_NAME = os.getenv("EMBEDDING_MODEL_NAME")
 EMEDDING_MODEL  = get_embedding_model(EMBEDDING_MODEL_NAME)
-EMBEDDING_CACHE = UpstashRedisStore(client=redis_client, ttl=None, namespace="embedding_service")
+# EMBEDDING_CACHE = UpstashRedisStore(client=redis_client, ttl=None, namespace="embedding_service")
 
 EMBEDDER = CacheBackedEmbeddings.from_bytes_store(
     underlying_embeddings=EMEDDING_MODEL, 
@@ -68,18 +72,23 @@ def compute_query_embedding(query_text: str):
     output = {"text": query_text, "embedding": vectors, "token_count": token_count, "time_taken": t.elapsed() }
     return output 
 
+
+class FileItem(BaseModel):
+    S3Path: str
+    
 @r.post("/storeDocEmbedding")
-def store_document_embedding(S3Path:str):
+def store_document_embedding(request:FileItem):
+    S3Path = request.S3Path
     document = load_s3_file(S3Path, S3_BUCKET_NAME)
     text_splitter = get_text_splitter()
     # text_splitter = get_token_splitter(MODEL_NAME)
     chunks = chunk_docs(document, text_splitter)
     # model = get_embedding_model()
     # model  = EMEDDING_MODEL
+    token_count = sum([num_tokens_from_string(doc.page_content, MODEL_NAME) for doc in chunks])
     with Timer() as t:
         vectors = create_doc_embeddings(chunks, EMBEDDER)
-    VECTOR_DB.add_documents(chunks)
-    token_count = sum([num_tokens_from_string(doc.page_content, MODEL_NAME) for doc in chunks])
+        VECTOR_DB.add_documents(chunks)
     output = {"document": document, 
               "chunks": chunks,
               "embedding": vectors, 
@@ -87,11 +96,9 @@ def store_document_embedding(S3Path:str):
               "time_taken": t.elapsed() }
     return output     
 
-from pydantic import BaseModel
 
 class Item(BaseModel):
     text: str
-
 
 
 @r.post("/storeTextEmbedding")
@@ -99,10 +106,12 @@ def store_text_embedding(request: Item):
     text = request.text
     text_splitter = get_text_splitter()
     chunks = chunk_texts(text, text_splitter)
+    for chunk in chunks:
+        chunk.metadata['source'] = "user_input"
+    token_count = sum([num_tokens_from_string(chunk.page_content, MODEL_NAME) for chunk in chunks])        
     with Timer() as t:
-        vectors = create_text_embeddings(chunks, EMBEDDER)
-    token_count = sum([num_tokens_from_string(chunk, MODEL_NAME) for chunk in chunks])
-    VECTOR_DB.add_texts(chunks)
+        vectors = create_doc_embeddings(chunks, EMBEDDER)
+        VECTOR_DB.add_documents(chunks)
     output = {"text": text, 
               "chunks": chunks,
               "embedding": vectors, 
@@ -111,13 +120,30 @@ def store_text_embedding(request: Item):
     return output     
 
 
-@r.get("/fetchDocEmbeddings/{S3Path}")
-async def fetch_stored_document_embedding(S3Path: str):
+@r.post("/fetchDocEmbeddings")
+async def fetch_stored_document_embedding(request: FileItem):
     #similarity_search_with_score
-    pass
-    
+    S3Path = request.S3Path
+    document = load_s3_file(S3Path, S3_BUCKET_NAME)
+    text_splitter = get_text_splitter()
+    # text_splitter = get_token_splitter(MODEL_NAME)
+    chunks = chunk_docs(document, text_splitter)    
+    with Timer() as t:
+        vectors = create_doc_embeddings(chunks, EMBEDDER)
+    results = []
+    for vector in vectors:
+        results.extend(VECTOR_DB.similarity_search_by_vector(vector,k=1))
+    return results
 
-@r.get("/fetchTextEmbeddings/{text}")
-async def fetch_stored_text_embedding(text: str):
+@r.post("/fetchTextEmbeddings")
+async def fetch_stored_text_embedding(request: Item):
     #similarity_search_with_score_by_vector
-    pass
+    text = request.text
+    text_splitter = get_text_splitter()
+    chunks = chunk_texts(text, text_splitter)
+    with Timer() as t:
+        vectors = create_doc_embeddings(chunks, EMBEDDER)
+    results = []
+    for vector in vectors:
+        results.extend(VECTOR_DB.similarity_search_by_vector(vector,k=1))
+    return results
