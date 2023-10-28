@@ -32,7 +32,6 @@ dependencies = [
     "python-dotenv>=1.0.0",
     "PyMuPDF>=1.23.5",
     "sentence-transformers>=2.2.2",
-    "pymilvus>=2.3.1",
     "orjson>=3.9.9",
     "boto3>=1.28.72",
     "unstructured>=0.10.27",
@@ -40,6 +39,8 @@ dependencies = [
     "langchain-g4f @ git+https://github.com/AlexanderKorataev/langchain-gpt4free.git",
     "langchain>=0.0.325",
     "redis>=5.0.1",
+    "pymilvus>=2.3.2",
+    "setuptools>=68.2.2",
 ]
 requires-python = ">=3.11,<3.12"
 readme = "../../README.md"
