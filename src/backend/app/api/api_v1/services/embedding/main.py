@@ -7,7 +7,6 @@ from app.core.auth import get_current_active_user
 from service import router 
 from fastapi.responses import ORJSONResponse
 
-
 app = FastAPI(
     title=config.PROJECT_NAME, docs_url="/api/docs", openapi_url="/api", default_response_class=ORJSONResponse
 )
