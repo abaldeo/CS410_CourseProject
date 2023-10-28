@@ -5,21 +5,23 @@
 # Learn more from ready-to-use templates: https://www.gitpod.io/docs/introduction/getting-started/quickstart
 
 tasks:
-  - name: Install PDM & Dependencies
+  - name: Install PDM
     before: |
       (set -e 
-      pyenv install 3.11
+      pyenv install -f 3.11
       pyenv global 3.11 
       export HOME="/home/${USER}"
       # Install pdm
       export PDM_PATH="${HOME}/.local/bin"
       export PATH="${PDM_PATH}:$PATH"
       curl -sSL https://pdm.fming.dev/install-pdm.py | python -
+      gp sync-done pdminstall
       )
-    init: |
-      (set -e
-      cd src/backend && pdm install
-      )
+
+  - name: Install Dependencies
+    init: gp sync-await pdminstall # wait for the above 'init' to finish
+    command: cd src/backend && pdm install
+
   # - init: make
 
 ports:
