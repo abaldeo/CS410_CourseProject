@@ -18,7 +18,7 @@ import os
 load_dotenv()
 
 ZILLIZ_CLOUD_COLLECTION_NAME = os.getenv("ZILLIZ_CLOUD_COLLECTION_NAME")
-ZILLIZ_CLOUD_URI = os.getenv("ZILLIZ_CLOUD_URI").strip()
+ZILLIZ_CLOUD_URI = os.getenv("ZILLIZ_CLOUD_URI") 
 ZILLIZ_CLOUD_API_KEY = os.getenv("ZILLIZ_CLOUD_API_KEY")
 
 # print(ZILLIZ_CLOUD_COLLECTION_NAME)
@@ -42,7 +42,18 @@ def create_vectorstore(embedding_model):
             "token": ZILLIZ_CLOUD_API_KEY,            
             "secure": False,
         },
+        # On Zilliz Cloud
+        # index_params = {
+        #     # Always set this to AUTOINDEX or just omit it.
+        #     "index_type": "AUTOINDEX",            
+        #     # Default to IP. This is the only parameter you should think about.
+        #     "metric_type": "COSINE",
+        #     # No need to set `params` 
+        #     # "params": {},
+        # },
     )
+
+
     return vectorstore
 
 
@@ -145,9 +156,9 @@ def chunk_docs(docs,text_splitter, clean=True):
     return chunks
 
 def chunk_texts(texts, text_splitter, clean=True):
-    # if not isinstance(texts, list): texts = [texts]    
-    if clean: texts = clean_text(texts)            
-    chunks = text_splitter.split_text(texts)
+    if clean: texts = clean_text(texts)        
+    if not isinstance(texts, list): texts = [texts]            
+    chunks = text_splitter.create_documents(texts)
     # if clean: chunks = clean_texts(texts)        
     return chunks
 
@@ -183,7 +194,7 @@ def create_query_embeddings(query_text, embedding_model):
 
 
 def main():
-    file='/workspaces/CS410_CourseProject/src/backend/data/transcripts/01_10-1-text-clustering-motivation.en.txt'
+    file='/workspace/CS410_CourseProject/src/backend/data/transcripts/01_10-1-text-clustering-motivation.en.txt'
     doc = load_document(file)
     # print(doc)
     text_splitter = get_text_splitter()
