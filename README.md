@@ -217,3 +217,22 @@ $tree . -d                                                           3:30:31
 ├── nginx
 └── scripts
 ```
+
+
+For testing: If you want to run the extension on chrome, navigate to:
+```
+./src/frontend/extension
+```
+From here, run 
+```
+npm run dev
+```
+This will create a build folder insie of this directory which contains
+```
+chrome-mv3-dev
+```
+Then, to load the extension, navigate to Chrome's manage extension menu and click Load Unpacked, selecting the 
+```
+chrome-mv3-dev
+```
+folder
