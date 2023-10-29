@@ -70,7 +70,3 @@ async def generateSummary(summary_model: SummaryRequestModel) -> dict:
             f"{summary_model.courseName}"
             }
     
-
-
-
-

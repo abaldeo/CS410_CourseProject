@@ -1,4 +1,3 @@
-
 from langchain.document_loaders import S3FileLoader
 from langchain.prompts import PromptTemplate
 from langchain.chains import LLMChain
@@ -138,4 +137,5 @@ def generate_summary(txt_to_summarize: Document) -> str:
     chain = LLMChain(llm=llm, prompt=prompt)
     bulleted_summary= chain.run({'text':cleaned_txt, 'num_bullet_points':'8'})
     return bulleted_summary
+
 
