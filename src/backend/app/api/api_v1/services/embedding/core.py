@@ -133,7 +133,7 @@ def clean_text(text):
     
     return text
 
-def get_text_splitter( chunk_size=1000, chunk_overlap=20, **kwargs):
+def get_text_splitter( chunk_size=1000, chunk_overlap=100, **kwargs):
     from langchain.text_splitter import RecursiveCharacterTextSplitter
     text_splitter = RecursiveCharacterTextSplitter(chunk_size=chunk_size, chunk_overlap=chunk_overlap,
                                                    	length_function = len, add_start_index = True, **kwargs)
@@ -191,6 +191,23 @@ def create_text_embeddings(text_chunks, embedding_model):
 def create_query_embeddings(query_text, embedding_model):
     return embedding_model.embed_query(query_text)
 
+def create_qa_chain(llm, vectorstore):
+    from langchain.chains import RetrievalQA
+    QA_CHAIN_PROMPT=""
+    qa_chain = RetrievalQA.from_chain_type(
+    llm,
+    retriever=vectorstore.as_retriever(),
+    return_source_documents=True,
+    chain_type_kwargs={"prompt": QA_CHAIN_PROMPT})
+    return qa_chain 
+
+def create_conversation_chain(llm, vectorstore, memory):
+    from langchain.chains import ConversationalRetrievalChain    
+    return ConverationalRetrievalChain.from_llm(llm=llm, retriever= vectorstore.as_retriever(), memory=memory)
+
+def create_memory():
+    from langchain.memory import ConversationBufferMemory
+    return ConversationBufferMemory(memory_key="chat_history", return_messages=True)
 
 
 def main():
