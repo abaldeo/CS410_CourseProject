@@ -119,3 +119,20 @@
 .button2:hover {
   box-shadow: rgba(39, 174, 96, .2) 0 6px 12px;
 }
+
+.input {
+  text-align: center;
+  margin: auto;
+  padding: 20px 20px;
+}
+.settingsIcon {
+  margin-right: 5px;
+  cursor: pointer;
+  width: 20px;
+  height: 20px;
+}
+.settingsButton {
+  background-color: transparent;
+  border: none;
+  text-align: right;
+}

@@ -1,11 +1,14 @@
 import { useState, useEffect } from "react"
 import * as style from "./styles.module.css"
 import { ChatBoxPopUp } from "./chatbox"
+import { FileUpload } from "./uploadfile"
+import Pic from "./settings-icon.png"
 
 function IndexPopup() {
   const [currentUrl, setCurrentUrl] = useState<string>("")
   const [currentUsername, setCurrentUsername] = useState<string>("")
-  const [open, setOpen] = useState(false)
+  const [openChatbox, setOpenChatbox] = useState(false)
+  const [openUpload, setOpenUpload] = useState(false)
 
   const getCurrentUrl = async () => {
     const [tab] = await chrome.tabs.query({active: true, currentWindow: true})
@@ -30,6 +33,9 @@ function IndexPopup() {
   if (currentUrl.includes("coursera.org")) {
     return (
       <div className={style.div}>
+        <button className={style.settingsButton} value="settings">
+            <img className={style.settingsIcon} src={Pic} alt=""></img>
+        </button>
         <h1 className={style.h1}>
           Welcome to CourseBuddy, {currentUsername}!
         </h1>
@@ -39,10 +45,16 @@ function IndexPopup() {
         </button>
         <button
           className={style.button}
-          onClick={() => setOpen(true)}
+          onClick={() => setOpenChatbox(true)}
           value="Chat Box">Ask a Question
         </button>
-        {open ? <ChatBoxPopUp closePopup={() => setOpen(false)}/> : null}
+        {openChatbox ? <ChatBoxPopUp closePopup={() => setOpenChatbox(false)}/> : null}
+        <button
+          className={style.button}
+          onClick={() => setOpenUpload(true)}
+          value="Upload File">Upload File
+        </button>
+        {openUpload ? <FileUpload closePopupUpload={() => setOpenUpload(false)}/> : null}
       </div>
     )
   }
