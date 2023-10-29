@@ -1,6 +1,4 @@
 from fastapi import APIRouter
-from dotenv import load_dotenv
-import os 
 from app.api.api_v1.services.embedding.core import (get_token_splitter,
                                                     get_text_splitter,
                                                     get_embedding_model, 
@@ -14,12 +12,14 @@ from app.api.api_v1.services.embedding.core import (get_token_splitter,
 from app.api.api_v1.services.embedding.utils import Timer 
 from app.api.api_v1.services.embedding.token_count import num_tokens_from_string
 
-from langchain.storage.upstash_redis import UpstashRedisStore
+# from langchain.storage.upstash_redis import UpstashRedisStore
+# from upstash_redis import Redis
 from langchain.storage.redis import RedisStore
-
-from langchain.embeddings import CacheBackedEmbeddings
-from upstash_redis import Redis
 import redis
+from langchain.embeddings import CacheBackedEmbeddings
+
+from dotenv import load_dotenv
+import os 
 from pydantic import BaseModel
 
 
@@ -121,7 +121,7 @@ def store_text_embedding(request: Item):
 
 
 @r.post("/fetchDocEmbeddings")
-async def fetch_stored_document_embedding(request: FileItem):
+def fetch_stored_document_embedding(request: FileItem):
     #similarity_search_with_score
     S3Path = request.S3Path
     document = load_s3_file(S3Path, S3_BUCKET_NAME)
@@ -136,7 +136,7 @@ async def fetch_stored_document_embedding(request: FileItem):
     return results
 
 @r.post("/fetchTextEmbeddings")
-async def fetch_stored_text_embedding(request: Item):
+def fetch_stored_text_embedding(request: Item):
     #similarity_search_with_score_by_vector
     text = request.text
     text_splitter = get_text_splitter()
