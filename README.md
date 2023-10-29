@@ -236,3 +236,9 @@ Then, to load the extension, navigate to Chrome's manage extension menu and clic
 chrome-mv3-dev
 ```
 folder
+
+All these commands should be ran while in the "extension" folder. A 
+```
+npm install
+```
+may be necessary in this folder as well.
