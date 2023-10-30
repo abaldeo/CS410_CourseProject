@@ -2,7 +2,7 @@
 
 ## Overview
 
-CourseBuddy is a Chrome extension designed to enhance the Coursera Online Learning Platform, allowing students to upload lecture transcripts and slides (PDF/PPT) for automated summarization. These documents will be indexed in a vector database. Subsequently, we will employ the Retrieval Augmentation Generation (RAG) technique, in combination with a powerful language model like ChatGPT/LLAMA2, to build a Q&A chatbot interface based on the uploaded course content. The full project proposal and progress reports are stored in this repository under the reports folder. 
+CourseBuddy is a Chrome extension designed to enhance the Coursera Online Learning Platform, allowing students to upload lecture transcripts and slides (PDF/PPT) for automated summarization. These documents will be indexed in a vector database. Subsequently, we will employ the Retrieval Augmentation Generation (RAG) technique, in combination with a large language model like ChatGPT/LLAMA2, to build a Q&A chatbot interface based on the uploaded course content. The full project proposal and progress reports are stored in this repository under the reports folder. 
 
 ## Team Members
 
