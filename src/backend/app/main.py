@@ -19,11 +19,6 @@ app = FastAPI(
 )
 
 
-@app.on_event("startup")
-async def startup_event():
-    configure_logging()
-
-
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
