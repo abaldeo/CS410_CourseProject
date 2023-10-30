@@ -9,7 +9,7 @@ from app.core import config
 from app.db.session import SessionLocal
 from app.core.auth import get_current_active_user
 from app.api import router as api
-
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import ORJSONResponse
   
 
@@ -17,6 +17,15 @@ app = FastAPI(
     title=config.PROJECT_NAME, docs_url="/api/docs", openapi_url="/api", default_response_class=ORJSONResponse
 )
 
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+		
 
 @app.middleware("http")
 async def db_session_middleware(request: Request, call_next):
@@ -38,6 +47,7 @@ async def example_task():
     return {"message": "success"}
 
 app.include_router(api)
+
 
 # Routers
 # app.include_router(
