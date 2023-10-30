@@ -1,3 +1,5 @@
+MORE CLEAR INSTRUCTIONS INCLUDED AT BOTTOM
+
 This is a [Plasmo extension](https://docs.plasmo.com/) project bootstrapped with [`plasmo init`](https://www.npmjs.com/package/plasmo).
 
 ## Getting Started
@@ -31,3 +33,29 @@ This should create a production bundle for your extension, ready to be zipped an
 ## Submit to the webstores
 
 The easiest way to deploy your Plasmo extension is to use the built-in [bpp](https://bpp.browser.market) GitHub action. Prior to using this action however, make sure to build your extension and upload the first version to the store to establish the basic credentials. Then, simply follow [this setup instruction](https://docs.plasmo.com/framework/workflows/submit) and you should be on your way for automated submission!
+
+
+
+For testing: If you want to run the extension on chrome, navigate to:
+```
+./src/frontend/extension
+```
+From here, run 
+```
+npm run dev
+```
+This will create a build folder insie of this directory which contains
+```
+chrome-mv3-dev
+```
+Then, to load the extension, navigate to Chrome's manage extension menu and click Load Unpacked, selecting the 
+```
+chrome-mv3-dev
+```
+folder
+
+All these commands should be ran while in the "extension" folder. A 
+```
+npm install
+```
+may be necessary in this folder as well.

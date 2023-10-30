@@ -45,12 +45,6 @@ function IndexPopup() {
         </button>
         <button
           className={style.button}
-          onClick={() => setOpenChatbox(true)}
-          value="Chat Box">Ask a Question
-        </button>
-        {openChatbox ? <ChatBoxPopUp closePopup={() => setOpenChatbox(false)}/> : null}
-        <button
-          className={style.button}
           onClick={() => setOpenUpload(true)}
           value="Upload File">Upload File
         </button>
