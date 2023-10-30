@@ -17,7 +17,7 @@ def orjson_serializer(obj):
     ).decode()
     
 engine = create_engine(
-    config.settings.SQLALCHEMY_DATABASE_URI,
+    config.SQLALCHEMY_DATABASE_URI,
     json_serializer=orjson_serializer,
     json_deserializer=orjson.loads,    
 )
@@ -35,7 +35,7 @@ def get_db():
         db.close()
 
 async_engine = create_async_engine(   
-    config.settings.SQLALCHEMY_ASYNC_DATABASE_URI,
+    config.SQLALCHEMY_ASYNC_DATABASE_URI,
     json_serializer=orjson_serializer,
     json_deserializer=orjson.loads,    
     pool_pre_ping=True
