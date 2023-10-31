@@ -1,5 +1,7 @@
 import time
 from contextlib import contextmanager
+from loguru import logger
+
 
 @contextmanager
 def timer():
@@ -7,7 +9,7 @@ def timer():
     yield
     end_time = time.time()
     elapsed_time = end_time - start_time
-    print(f"Elapsed time: {elapsed_time} seconds")
+    logger.info(f"Elapsed time: {elapsed_time} seconds")
 
 
 class Timer:
@@ -25,7 +27,7 @@ class Timer:
         self.end_time = time.time()
         self.elapsed_time = self.end_time - self.start_time
         msg =   (f"{self.context_name} took {self.elapsed_time:.4f} seconds") if self.context_name else  (f"Time Taken: {self.elapsed_time:.4f} seconds") 
-        print(msg )
+        logger.info(msg )
         
     def elapsed(self):
         return self.elapsed_time
