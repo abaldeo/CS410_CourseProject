@@ -1,3 +1,4 @@
+from app.core.log import configure_logging
 from fastapi import FastAPI, Depends
 from starlette.requests import Request
 import uvicorn
@@ -16,6 +17,11 @@ from fastapi.responses import ORJSONResponse
 app = FastAPI(
     title=config.settings.PROJECT_NAME, docs_url="/api/docs", openapi_url="/api", default_response_class=ORJSONResponse
 )
+
+
+@app.on_event("startup")
+async def startup_event():
+    configure_logging()
 
 
 app.add_middleware(
