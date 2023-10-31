@@ -23,6 +23,7 @@ from langchain.storage.redis import RedisStore
 # import os 
 from pydantic import BaseModel
 from app.core.config import settings, get_settings
+from loguru import logger
 
 
 # load_dotenv()

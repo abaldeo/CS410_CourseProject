@@ -38,6 +38,7 @@ class Settings(object):
     GPT_MODEL_NAME: str = os.getenv("MODEL_NAME")   #TODO rename in env file 
     EMBEDDING_MODEL_NAME: str = os.getenv("EMBEDDING_MODEL_NAME")
     
+    ENVIRONMENT: str = os.getenv("ENVIRONMENT")
     CELERY_BROKER_URL: str = os.getenv("CELERY_BROKER_URL", "redis://redis:6379/0")
 
     
