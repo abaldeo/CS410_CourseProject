@@ -5,7 +5,7 @@
 # Learn more from ready-to-use templates: https://www.gitpod.io/docs/introduction/getting-started/quickstart
 
 tasks:
-  - name: Install Pyenv 
+  - name: Install Pyenv
     init: |
       (set -e 
       if [[ "$(pyenv version-name)" != 3.11* ]]; then
@@ -15,24 +15,18 @@ tasks:
       gp sync-done pyenvinstall
       )
 
-  - name: Install PDM 
+  - name: Install PDM & Dependencies
     init: gp sync-await pyenvinstall
-    command: | 
+    command: |
       (set -e 
       export HOME="/home/${USER}"
       # Install pdm
       export PDM_PATH="${HOME}/.local/bin"
       export PATH="${PDM_PATH}:$PATH"
       curl -sSL https://pdm.fming.dev/install-pdm.py | python -
-      gp sync-done pdminstall 
-      )
-
-  - name: Install Dependencies
-    init: gp sync-await pdminstall # wait for the above 'init' to finish
-    command: | 
-      (set -e 
       cd src/backend && pdm install
       echo $(pdm venv activate) >> ~/.bashrc
+      gp sync-done pdminstall 
       )
 
   - name: Set Git config
@@ -45,7 +39,6 @@ tasks:
       git config --global user.name "${GIT_USER}"
       fi 
       )
-
 
   # - init: make
 
