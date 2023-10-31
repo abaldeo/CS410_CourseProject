@@ -13,8 +13,8 @@ def init() -> None:
     create_user(
         db,
         UserCreate(
-            email=config.SUPERUSER_EMAIL,
-            password=config.SUPERUSER_PASSWORD,
+            email=config.settings.SUPERUSER_EMAIL,
+            password=config.settings.SUPERUSER_PASSWORD,
             is_active=True,
             is_superuser=True,
         ),
