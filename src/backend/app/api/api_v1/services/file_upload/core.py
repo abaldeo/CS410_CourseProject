@@ -51,55 +51,58 @@ def retrieve_transcript(course_name, transcript_name):
 
 
 # Helper function to upload a slide deck (.ppt, .pdf)
-def upload_slides(course_name, transcript_name, slide_object):
+def upload_slides(course_name, transcript_name, slide_file):
     session = boto3.session.Session()
     client = session.client('s3',
-                            # Configures to use subdomain/virtual calling format.
-                            config=botocore.config.Config(s3={'addressing_style': 'virtual'}), 
-                            region_name='nyc3',
-                            endpoint_url='https://nyc3.digitaloceanspaces.com',
-                            aws_access_key_id=os.getenv('AWS_ACCESS_KEY_ID'),
-                            aws_secret_access_key=os.getenv('AWS_SECRET_ACCESS_KEY'))
-
-    # Define the object key (file path)
-    object_key = f"{course_name}/{slide_object}"
-
-    # Get file extension to ensure it is correct format
-    file_extension = pathlib.Path(slide_object).suffix
-
-    if file_extension in [".pdf", ".ppt"]:
-        # Upload the transcript text to DigitalOcean Spaces
-        client.put_object(Bucket="coursebuddy",
-                    Key=object_key,
-                    Body=slide_object,
-                    ACL='private',
-                    Metadata={
-                        'x-amz-meta-my-key': 'placeholder-value'
-                    }
-        )
-        return f"Slide deck {slide_object} for course {course_name} uploaded successfully."
-    else:
-        return f"Unsupported file format: {file_extension}. Slide deck not uploaded."
-
-
-# Helper function to retrieve a transcript
-def retrieve_slides(course_name, transcript_name):
-    # Define the object key (file path)
-    object_key = f"{course_name}/{transcript_name}.txt"
-    session = boto3.session.Session()
-    client = session.client('s3',
-                             # Configures to use subdomain/virtual calling format.
                             config=botocore.config.Config(s3={'addressing_style': 'virtual'}),
                             region_name='nyc3',
                             endpoint_url='https://nyc3.digitaloceanspaces.com',
                             aws_access_key_id=os.getenv('AWS_ACCESS_KEY_ID'),
                             aws_secret_access_key=os.getenv('AWS_SECRET_ACCESS_KEY'))
 
-    #Retrieve the transcript text from DigitalOcean Spaces
-    transcript_text = client.download_file('coursebuddy',
-                    object_key,
-                    './object_key')
-    return "File downloaded successfully!"
+    # Define the object key (file path)
+    object_key = f"{course_name}/{transcript_name}"
+
+    # Get the file extension to ensure it is in the correct format
+    file_extension = pathlib.Path(slide_file.name).suffix
+
+    if file_extension in [".pdf", ".ppt"]:
+        # Upload the PDF or PPT slide to DigitalOcean Spaces
+        client.put_object(Bucket="coursebuddy",
+                          Key=object_key + file_extension,
+                          Body=slide_file,
+                          ACL='private',
+                          Metadata={'x-amz-meta-my-key': 'placeholder-value'})
+        return f"Slide deck {transcript_name} for course {course_name} uploaded successfully."
+    else:
+        return f"Unsupported file format: {file_extension}. Slide deck not uploaded."
+
+
+# Helper function to retrieve a transcript
+def retrieve_slides(course_name, slide_name):
+    session = boto3.session.Session()
+    client = session.client('s3',
+                            config=botocore.config.Config(s3={'addressing_style': 'virtual'}),
+                            region_name='nyc3',
+                            endpoint_url='https://nyc3.digitaloceanspaces.com',
+                            aws_access_key_id=os.getenv('AWS_ACCESS_KEY_ID'),
+                            aws_secret_access_key=os.getenv('AWS_SECRET_ACCESS_KEY'))
+
+    # Attempt to retrieve a ".pdf" version of the file
+    pdf_object_key = f"{course_name}/{slide_name}.pdf"
+    try:
+        local_pdf_file_path = f'./{slide_name}.pdf'
+        client.download_file('coursebuddy', pdf_object_key, local_pdf_file_path)
+        return f"File {slide_name}.pdf downloaded successfully."
+    except Exception as pdf_error:
+        # If a ".pdf" version is not found, attempt to retrieve a ".ppt" version of the file
+        ppt_object_key = f"{course_name}/{slide_name}.ppt"
+        try:
+            local_ppt_file_path = f'./{slide_name}.ppt'
+            client.download_file('coursebuddy', ppt_object_key, local_ppt_file_path)
+            return f"File {slide_name}.ppt downloaded successfully."
+        except Exception as ppt_error:
+            return f"Failed to download file {slide_name}.pdf or {slide_name}.ppt. Error: {str(pdf_error) if 'pdf' in str(pdf_error) else str(ppt_error)}"
 
 
 
