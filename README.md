@@ -1,45 +1,27 @@
 # CS410_CourseProject
 
-To install packages using follow these steps:
+## Overview
 
-1. Open a terminal in your dev container.
-2. Change the current directory to the `src/backend` directory by running the command
-   `cd src/backend`
-4. Install the packages using pdm
-   `pdm install`
+CourseBuddy is a Chrome extension designed to enhance the Coursera Online Learning Platform, allowing students to upload lecture transcripts and slides (PDF/PPT) for automated summarization. These documents will be indexed in a vector database. Subsequently, we will employ the Retrieval Augmentation Generation (RAG) technique, in combination with a large language model like ChatGPT/LLAMA2, to build a Q&A chatbot interface based on the uploaded course content. The full project proposal and progress reports are stored in this repository under the reports folder. 
 
-To run a script using pdm, follow these steps:
-1. Open a terminal in your dev container.
-2. Change the current directory to `src/backend` of your project.
-   `cd src/backend`
-4. Run the script using pdm
-   `pdm run python app/main.py`
+## Team Members
 
-To add new backend service, follow these steps:
-   1. Add new service folder & the following files under `src/backend/app/api/api_v1/services`
-      ```
-      │       ├── api
-      │       │   ├── api_v1
-      │       │   │   └── services
-      │       │   │   |  └── service_name
-      │       │   │   |  |   └── __init__.py  # export router (critical)
-      │       │   │   |  |   └── core.py # define logic
-      │       │   │   |  |   └── service.py # define routes
-      │       │   │   |  |   └── main.py # use to test locally
-      ```
-   2. then add router to `__init__.py` in top-level services folder
-      ```
-      from .service_name import service_name_router # exported router name
-      service_router.include_router(service_name_router)      
-      ```
-   4. To test service independently, update main.py & run
-      ```pdm run python service_name/main.py```
+**Team Name:** CourseBuddyAI
+
+**Team Members:**
+
+- Avinash Badeo (@abaldeo2)
+- Zach Pohl (@zcpohl2)
+- Colton Bailey (@coltonb4)
+- Ehsan Sarfaraz (@ehsans3)
+- Kacper Dural (@kdural2)
+
 
 ## Features
 
-- **FastAPI** with Python 3.8
+- **FastAPI** with Python 3.11
 - **React 16** with Typescript, Redux, and react-router
-- Postgres
+- Postgres (asyncpg)
 - SqlAlchemy with Alembic for migrations
 - Pytest for backend tests
 - Jest for frontend tests
@@ -185,7 +167,7 @@ docker-compose logs -f name_of_service # frontend|backend|db
 ## Project Layout
 
 ```bash
-$tree . -d                                                           3:30:31
+$tree . -d                                                           
 .
 ├── backend
 │   └── app
