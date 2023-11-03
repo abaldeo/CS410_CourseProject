@@ -13,8 +13,8 @@ import asyncio
 
 from typing import List
 import os
-
-from app.api.api_v1.utils.text_splitting import clean_text
+import string
+import re 
 
 AWS_REGION_NAME = os.getenv("REGION_NAME")
 S3_ENDPOINT_URL = os.getenv("ENDPOINT_URL")
@@ -27,6 +27,18 @@ class SummaryRequestModel(BaseModel):
     videoName: str
     S3Path: str
 
+
+def clean_text(text: str) -> str:
+    # Lowercase the text
+    text = text.lower()
+    text =  text.replace('[sound]','')
+    text =  text.replace('[music]','')
+    text =  text.replace('[inaudible]','')
+    
+    text = re.sub(r'[ |\t]', ' ', text).strip()
+    text = ''.join(c for c in text if c not in string.punctuation)
+    
+    return text
 
 # Helper function to upload a transcript
 async def upload_summary_to_s3(course_name: str, transcript_name: str, summary_text: str):
