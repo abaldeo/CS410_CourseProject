@@ -42,6 +42,11 @@ For testing: If you want to run the extension on chrome, navigate to:
 ```
 From here, run 
 ```
+npm install plasmo
+```
+then,
+
+```
 npm run dev
 ```
 This will create a build folder insie of this directory which contains

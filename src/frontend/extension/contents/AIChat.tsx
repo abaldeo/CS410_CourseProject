@@ -1,8 +1,8 @@
-import cssText from "./styles.module.css"
+import cssText from "../styles.module.css"
 import { useState, useEffect } from "react"
-import { ChatBoxPopUp } from "./chatbox"
+import { ChatBoxPopUp } from "../chatbox"
 import type { PlasmoCSConfig } from "plasmo"
-import Pic from "./chat-icon.png"
+import Pic from "../chat-icon.png"
 
 
 

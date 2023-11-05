@@ -41,10 +41,6 @@ function IndexPopup() {
         </h1>
         <button
           className={style.button}
-          value="Generate Summary">Generate Summary
-        </button>
-        <button
-          className={style.button}
           onClick={() => setOpenUpload(true)}
           value="Upload File">Upload File
         </button>
