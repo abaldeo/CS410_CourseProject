@@ -1,7 +1,7 @@
 import cssText from "data-text:../styles.module.css"
 import { useState, useEffect } from "react"
 import { ChatBox } from "../chatbox"
-import type { PlasmoCSConfig, PlasmoGetOverlayAnchor } from "plasmo"
+import type { PlasmoCSConfig, PlasmoGetInlineAnchor, PlasmoGetOverlayAnchor } from "plasmo"
 import Pic from "../chat-icon.png"
 import createCache from '@emotion/cache'
 import { CacheProvider } from '@emotion/react';
@@ -24,8 +24,9 @@ export const config: PlasmoCSConfig = {
     matches: ["https://www.coursera.org/*"]
 }
 
-export const getOverlayAnchor: PlasmoGetOverlayAnchor = async () =>
-    document.querySelectorAll('div[aria-label="Video Player"]')[0]
+export const getInlineAnchor: PlasmoGetInlineAnchor = () =>
+    // document.querySelectorAll('div[aria-label="Video Player"]')[0]
+    document.querySelectorAll('button[id="downloads-dropdown-btn"]')[0]
 
 // export const getStyle = () => {
 //     const style = document.createElement("style")
