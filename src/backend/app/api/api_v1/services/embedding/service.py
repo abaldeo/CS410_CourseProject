@@ -1,6 +1,4 @@
 from fastapi import APIRouter
-from dotenv import load_dotenv
-import os 
 from app.api.api_v1.services.embedding.core import (get_token_splitter,
                                                     get_text_splitter,
                                                     get_embedding_model, 
@@ -18,6 +16,8 @@ from app.api.api_v1.services.embedding.token_count import num_tokens_from_string
 # from upstash_redis import Redis
 import functools
 from langchain.storage.redis import RedisStore
+import redis
+from langchain.embeddings import CacheBackedEmbeddings
 
 # from dotenv import load_dotenv
 # import os 
@@ -72,8 +72,13 @@ def compute_query_embedding(query_text: str):
     output = {"text": query_text, "embedding": vectors, "token_count": token_count, "time_taken": t.elapsed() }
     return output 
 
+
+class FileItem(BaseModel):
+    S3Path: str
+    
 @r.post("/storeDocEmbedding")
-def store_document_embedding(S3Path:str):
+def store_document_embedding(request:FileItem):
+    S3Path = request.S3Path
     document = load_s3_file(S3Path, S3_BUCKET_NAME)
     text_splitter = get_text_splitter()
     # text_splitter = get_token_splitter(MODEL_NAME)
@@ -83,8 +88,7 @@ def store_document_embedding(S3Path:str):
     token_count = sum([num_tokens_from_string(doc.page_content, GPT_MODEL_NAME) for doc in chunks])
     with Timer() as t:
         vectors = create_doc_embeddings(chunks, EMBEDDER)
-    VECTOR_DB.add_documents(chunks)
-    token_count = sum([num_tokens_from_string(doc.page_content, MODEL_NAME) for doc in chunks])
+        VECTOR_DB.add_documents(chunks)
     output = {"document": document, 
               "chunks": chunks,
               "embedding": vectors, 
@@ -92,7 +96,6 @@ def store_document_embedding(S3Path:str):
               "time_taken": t.elapsed() }
     return output     
 
-from pydantic import BaseModel
 
 class Item(BaseModel):
     text: str
@@ -107,9 +110,8 @@ def store_text_embedding(request: Item):
         chunk.metadata['source'] = "user_input"
     token_count = sum([num_tokens_from_string(chunk.page_content, GPT_MODEL_NAME) for chunk in chunks])        
     with Timer() as t:
-        vectors = create_text_embeddings(chunks, EMBEDDER)
-    token_count = sum([num_tokens_from_string(chunk, MODEL_NAME) for chunk in chunks])
-    VECTOR_DB.add_texts(chunks)
+        vectors = create_doc_embeddings(chunks, EMBEDDER)
+        VECTOR_DB.add_documents(chunks)
     output = {"text": text, 
               "chunks": chunks,
               "embedding": vectors, 
@@ -118,13 +120,30 @@ def store_text_embedding(request: Item):
     return output     
 
 
-@r.get("/fetchDocEmbeddings/{S3Path}")
-async def fetch_stored_document_embedding(S3Path: str):
+@r.post("/fetchDocEmbeddings")
+def fetch_stored_document_embedding(request: FileItem):
     #similarity_search_with_score
-    pass
-    
+    S3Path = request.S3Path
+    document = load_s3_file(S3Path, S3_BUCKET_NAME)
+    text_splitter = get_text_splitter()
+    # text_splitter = get_token_splitter(MODEL_NAME)
+    chunks = chunk_docs(document, text_splitter)    
+    with Timer() as t:
+        vectors = create_doc_embeddings(chunks, EMBEDDER)
+    results = []
+    for vector in vectors:
+        results.extend(VECTOR_DB.similarity_search_by_vector(vector,k=1))
+    return results
 
-@r.get("/fetchTextEmbeddings/{text}")
-async def fetch_stored_text_embedding(text: str):
+@r.post("/fetchTextEmbeddings")
+def fetch_stored_text_embedding(request: Item):
     #similarity_search_with_score_by_vector
-    pass
+    text = request.text
+    text_splitter = get_text_splitter()
+    chunks = chunk_texts(text, text_splitter)
+    with Timer() as t:
+        vectors = create_doc_embeddings(chunks, EMBEDDER)
+    results = []
+    for vector in vectors:
+        results.extend(VECTOR_DB.similarity_search_by_vector(vector,k=1))
+    return results
