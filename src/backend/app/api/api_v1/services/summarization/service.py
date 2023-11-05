@@ -1,5 +1,3 @@
-
-
 from langchain.docstore.document import Document
 from fastapi import APIRouter
 import functools
