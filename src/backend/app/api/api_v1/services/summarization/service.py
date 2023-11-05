@@ -59,7 +59,7 @@ async def generateSummary(summary_model: SummaryRequestModel) -> dict:
                                           gpt_model_name=settings.GPT_MODEL_NAME) # Assuming only one doc
         save_to_cache(course_name=summary_model.courseName, video_name=summary_model.videoName, summary=summary_result, 
                       redis_instance=REDIS_INSTANCE)
-        upload_summary_to_s3(course_name=summary_model.courseName, transcript_name=summary_model.videoName,
+        await upload_summary_to_s3(course_name=summary_model.courseName, transcript_name=summary_model.videoName,
                               summary_text=summary_result)
         result = {
             "summary": summary_result

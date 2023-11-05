@@ -1,6 +1,6 @@
 from langchain.document_loaders import S3FileLoader
 from langchain.prompts import PromptTemplate
-# from langchain.chains import LLMChain
+from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.chains.summarize import load_summarize_chain
 from langchain.docstore.document import Document
 from langchain.chat_models import ChatOpenAI
@@ -8,19 +8,14 @@ from pydantic import BaseModel
 from urllib.parse import urlparse
 from botocore.exceptions import ClientError
 from redis import Redis
-import boto3
+import aioboto3
 import botocore
-import asyncio
+import tiktoken
 
 from typing import List
-import os
-import string
 import re 
 
-AWS_REGION_NAME = os.getenv("REGION_NAME")
-S3_ENDPOINT_URL = os.getenv("ENDPOINT_URL")
-AWS_SECRET_ACCESS_KEY = os.getenv("AWS_SECRET_ACCESS_KEY")
-AWS_ACCESS_KEY_ID = os.getenv("AWS_ACCESS_KEY_ID")
+from app.core.config import settings
 
 class SummaryRequestModel(BaseModel):
     userId: int
@@ -37,30 +32,26 @@ async def upload_summary_to_s3(course_name: str, transcript_name: str, summary_t
         transcript_name (str): video's transcript that's being summarized
         summary_text (str): Summary of transcript
     """
-    loop = asyncio.get_event_loop()
+    session = aioboto3.Session()
+    client = session.client(
+        's3', 
+        config=botocore.config.Config(s3={'addressing_style': 'virtual'}), 
+        region_name='nyc3', 
+        endpoint_url=settings.S3_ENDPOINT_URL, 
+        aws_access_key_id=settings.AWS_ACCESS_KEY_ID, 
+        aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY
+    )
 
-    def upload_summary(course_name: str, transcript_name: str, summary_text: str):
-        session = boto3.session.Session()
-        client = session.client('s3',
-                                config=botocore.config.Config(s3={'addressing_style': 'virtual'}),
-                                region_name='nyc3',
-                                endpoint_url='https://nyc3.digitaloceanspaces.com',
-                                aws_access_key_id=AWS_ACCESS_KEY_ID,
-                                aws_secret_access_key=AWS_SECRET_ACCESS_KEY)
-
-        # Define the object key (file path)
-        object_key = f"{course_name}/{transcript_name}.txt"
-
-        # Upload the transcript text to DigitalOcean Spaces
-        client.put_object(Bucket="coursebuddysummary",
-                          Key=object_key,
-                          Body=summary_text,
-                          ACL='private',
-                          Metadata={
-                              'x-amz-meta-my-key': 'placeholder-value'
-                          })
-
-    await loop.run_in_executor(None, upload_summary, course_name, transcript_name, summary_text)
+    # Upload the transcript text to DigitalOcean Spaces
+    await client.put_object(
+        Bucket=settings.S3_SUMMARY_BUCKET_NAME, 
+        Key=f"{course_name}/{transcript_name}.txt", 
+        Body=summary_text, 
+        ACL='private', 
+        Metadata={
+            'x-amz-meta-my-key': 'placeholder-value'
+        }
+    )
 
 def get_transcript_from_s3(s3_path: str) -> List[Document]:
     """Retrieves the text transcript of a video from s3
@@ -74,8 +65,8 @@ def get_transcript_from_s3(s3_path: str) -> List[Document]:
     parsed_s3 = urlparse(url=s3_path, allow_fragments=False)
     parsed_s3.path.lstrip('/')
     loader = S3FileLoader(bucket=parsed_s3.netloc, key=parsed_s3.path, 
-                          region_name=AWS_REGION_NAME, endpoint_url=S3_ENDPOINT_URL,
-                          aws_access_key_id=AWS_ACCESS_KEY_ID, aws_secret_access_key=AWS_SECRET_ACCESS_KEY)
+                          region_name=settings.AWS_REGION_NAME, endpoint_url=settings.S3_ENDPOINT_URL,
+                          aws_access_key_id=settings.AWS_ACCESS_KEY_ID, aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY)
     try:
         return loader.load()
     except ClientError:
@@ -113,6 +104,26 @@ def save_to_cache(course_name: str, video_name: str, summary: str, redis_instanc
      """
      redis_instance.hset(key=f"{course_name}/{video_name}", value=summary)
 
+def get_encoder_for_model(model_name: str): 
+    try:
+        encoding = tiktoken.encoding_for_model(model_name)
+    except KeyError:
+        encoding = tiktoken.get_encoding("cl100k_base")
+    return encoding 
+
+def get_text_splitter2(model_name, chunk_size=500, chunk_overlap=20, **kwargs):
+    encoding = get_encoder_for_model(model_name).name
+    text_splitter = RecursiveCharacterTextSplitter.from_tiktoken_encoder(encoding, keep_separator=False,
+                                                chunk_size=chunk_size, chunk_overlap=chunk_overlap,
+                                                add_start_index = True,  **kwargs)
+    return text_splitter
+
+def chunk_docs(docs,text_splitter, clean=True):
+    if not isinstance(docs, list): 
+        docs = [docs]           
+    chunks = text_splitter.split_documents(docs)
+    return chunks
+
 def generate_summary(txt_to_summarize: Document, gpt_model_name: str) -> str:
     """Uses an LLM to generate a summary for a transcript
 
@@ -122,14 +133,18 @@ def generate_summary(txt_to_summarize: Document, gpt_model_name: str) -> str:
     Returns:
         str: Returns summarization of the transcript
     """
-    # Remove spaces and new lines from text to summarize
-    cleaned_txt = txt_to_summarize.page_content
-    cleaned_txt = re.sub(r'[ |\t]+', ' ', cleaned_txt)
-    cleaned_txt = re.sub(r"\n+", "\n", cleaned_txt)
-
-    gpt_model_name = 'gpt-3.5-turbo'
     llm = ChatOpenAI(temperature=0, model_name=gpt_model_name)
 
+    # Remove spaces and new lines from text to summarize
+    cleaned_txt = re.sub(r'[ |\t]+', ' ', txt_to_summarize.page_content)
+    cleaned_txt = re.sub(r"\n+", "\n", cleaned_txt)
+    txt_to_summarize.page_content = cleaned_txt
+
+    # Chunk data
+    text_splitter = get_text_splitter2(gpt_model_name, chunk_size=4096, chunk_overlap=0)
+    chunks = chunk_docs(txt_to_summarize, text_splitter=text_splitter)
+
+    # Create prompts
     chunk_summary_template = """
         Summarize this chunk of text that includes the main points and important details. {text}
     """
@@ -149,10 +164,7 @@ def generate_summary(txt_to_summarize: Document, gpt_model_name: str) -> str:
         template=combine_summary_template
     )
 
-    # chain = LLMChain(llm=llm, prompt=combine_summary_prompt)
-    # bulleted_summary= chain.run({'text':cleaned_txt, 'num_bullet_points':'8'})
-    # return bulleted_summary
-    chunks = cleaned_txt
+    # Create map reduce summ chain and summarizes
     map_reduce_chain = load_summarize_chain(
         llm=llm, 
         map_prompt=chunk_summary_prompt, 
@@ -160,6 +172,8 @@ def generate_summary(txt_to_summarize: Document, gpt_model_name: str) -> str:
         chain_type="map_reduce", 
         return_intermediate_steps=False
     )
-    summary = map_reduce_chain.run(chunks, {'num_bullet_points':'8'})
-
+    num_of_tokens = llm.get_num_tokens(txt_to_summarize)
+    num_of_bullet_points = -(num_of_tokens // -200) # Equivalent of math.ceil()
+    summary = map_reduce_chain.run(**{'input_documents': chunks, 'num_bullet_points': num_of_bullet_points})
+    return summary
 
