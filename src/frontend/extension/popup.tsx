@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react"
 import * as style from "./styles.module.css"
-import { ChatBoxPopUp } from "./chatbox"
 import { FileUpload } from "./uploadfile"
 import Pic from "./settings-icon.png"
 
