@@ -66,7 +66,7 @@ interface Message {
   
   
     return (
-    <Box display="flex" flexDirection="column" alignItems="center" p={2} width="400px" height="500px" bgcolor="text.secondary">
+    <Box display="flex" flexDirection="column" alignItems="center" p={2} width="400px" height="500px" bgcolor="#36454F" borderColor="#A9A9A9">
         <Button
             color="primary"
             variant="contained"

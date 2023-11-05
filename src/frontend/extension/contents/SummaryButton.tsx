@@ -10,6 +10,8 @@ export const config: PlasmoCSConfig = {
 export const getInlineAnchor: PlasmoGetInlineAnchor = () =>
     document.querySelectorAll('div[aria-label="Video Player"]')[0]
 
+export const getShadowHostID = () => "summary-button"
+
 export const getStyle = () => {
     const style = document.createElement("style")
     style.textContent = cssText

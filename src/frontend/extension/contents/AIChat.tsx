@@ -6,6 +6,8 @@ import Pic from "../chat-icon.png"
 import createCache from '@emotion/cache'
 import { CacheProvider } from '@emotion/react';
 
+// chrome.commands.onCommand.addListener()
+
 const styleElement = document.createElement("style")
 
 const styleCache = createCache({
