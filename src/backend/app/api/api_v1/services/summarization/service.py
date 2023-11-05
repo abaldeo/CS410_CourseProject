@@ -7,7 +7,7 @@ import redis
 
 from typing import List
 
-from .core import check_cache, save_to_cache, upload_summary_to_s3, get_transcript_from_s3, SummaryRequestModel
+from .core import check_cache, save_to_cache, upload_summary_to_s3, get_transcript_from_s3, SummaryRequestModel, generate_summary
 from app.core.config import settings
 
 
@@ -36,9 +36,10 @@ async def fetchSummary(courseName: str, videoName: str) -> dict:
     cache_results: dict | None = check_cache(courseName=courseName, video_name=videoName, 
                                              redis_instance=REDIS_INSTANCE)
     if cache_results:
+        cache_results.update({"status": True, "msg": "Success"})
         return cache_results
     else:
-        return {}  # Do we want explicit not found or is {} sufficient
+        return {"status": False, "msg": "Not Found"}
 
 @router.post("/generateSummary")
 async def generateSummary(summary_model: SummaryRequestModel) -> dict:
@@ -54,7 +55,8 @@ async def generateSummary(summary_model: SummaryRequestModel) -> dict:
     """
     transcripts_to_summarize: List[Document] | None = get_transcript_from_s3(s3_path=summary_model.S3Path,)
     if transcripts_to_summarize:
-        summary_result = generateSummary(transcripts_to_summarize[0]) # Assuming only one doc
+        summary_result = generate_summary(txt_to_summarize=transcripts_to_summarize[0], 
+                                          gpt_model_name=settings.GPT_MODEL_NAME) # Assuming only one doc
         save_to_cache(course_name=summary_model.courseName, video_name=summary_model.videoName, summary=summary_result, 
                       redis_instance=REDIS_INSTANCE)
         upload_summary_to_s3(course_name=summary_model.courseName, transcript_name=summary_model.videoName,

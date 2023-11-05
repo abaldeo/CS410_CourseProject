@@ -1,6 +1,7 @@
 from langchain.document_loaders import S3FileLoader
 from langchain.prompts import PromptTemplate
-from langchain.chains import LLMChain
+# from langchain.chains import LLMChain
+from langchain.chains.summarize import load_summarize_chain
 from langchain.docstore.document import Document
 from langchain.chat_models import ChatOpenAI
 from pydantic import BaseModel
@@ -28,19 +29,6 @@ class SummaryRequestModel(BaseModel):
     S3Path: str
 
 
-def clean_text(text: str) -> str:
-    # Lowercase the text
-    text = text.lower()
-    text =  text.replace('[sound]','')
-    text =  text.replace('[music]','')
-    text =  text.replace('[inaudible]','')
-    
-    text = re.sub(r'[ |\t]', ' ', text).strip()
-    text = ''.join(c for c in text if c not in string.punctuation)
-    
-    return text
-
-# Helper function to upload a transcript
 async def upload_summary_to_s3(course_name: str, transcript_name: str, summary_text: str):
     """Writes the generated summary to a database
 
@@ -125,7 +113,7 @@ def save_to_cache(course_name: str, video_name: str, summary: str, redis_instanc
      """
      redis_instance.hset(key=f"{course_name}/{video_name}", value=summary)
 
-def generate_summary(txt_to_summarize: Document) -> str:
+def generate_summary(txt_to_summarize: Document, gpt_model_name: str) -> str:
     """Uses an LLM to generate a summary for a transcript
 
     Args:
@@ -134,20 +122,44 @@ def generate_summary(txt_to_summarize: Document) -> str:
     Returns:
         str: Returns summarization of the transcript
     """
-    cleaned_txt = clean_text(txt_to_summarize.page_content)
-    llm = ChatOpenAI(temperature=0, model_name='gpt-3.5-turbo')
-    template="""
-    Compose a concise and a brief summary of the following text:
-    TEXT: `{text}`
-    Give the summary in bullet points using a max of {num_bullet_points} concise bullet points.
+    # Remove spaces and new lines from text to summarize
+    cleaned_txt = txt_to_summarize.page_content
+    cleaned_txt = re.sub(r'[ |\t]+', ' ', cleaned_txt)
+    cleaned_txt = re.sub(r"\n+", "\n", cleaned_txt)
+
+    gpt_model_name = 'gpt-3.5-turbo'
+    llm = ChatOpenAI(temperature=0, model_name=gpt_model_name)
+
+    chunk_summary_template = """
+        Summarize this chunk of text that includes the main points and important details. {text}
     """
-    # TODO come up with logic to decide max bullet points
-    prompt = PromptTemplate(
-        input_variables=['text', 'num_bullet_points'],
-        template=template
+
+    chunk_summary_prompt = PromptTemplate(
+        template=chunk_summary_template, 
+        input_variables=["text"]
     )
-    chain = LLMChain(llm=llm, prompt=prompt)
-    bulleted_summary= chain.run({'text':cleaned_txt, 'num_bullet_points':'8'})
-    return bulleted_summary
+
+    combine_summary_template="""
+        Compose a concise and a brief summary of the following text: TEXT: `{text}`. Give the summary in bullet 
+        points using a max of {num_bullet_points} concise bullet points.
+    """
+
+    combine_summary_prompt = PromptTemplate(
+        input_variables=['text', 'num_bullet_points'],
+        template=combine_summary_template
+    )
+
+    # chain = LLMChain(llm=llm, prompt=combine_summary_prompt)
+    # bulleted_summary= chain.run({'text':cleaned_txt, 'num_bullet_points':'8'})
+    # return bulleted_summary
+    chunks = cleaned_txt
+    map_reduce_chain = load_summarize_chain(
+        llm=llm, 
+        map_prompt=chunk_summary_prompt, 
+        combine_prompt=combine_summary_prompt, 
+        chain_type="map_reduce", 
+        return_intermediate_steps=False
+    )
+    summary = map_reduce_chain.run(chunks, {'num_bullet_points':'8'})
 
 
