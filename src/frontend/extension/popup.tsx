@@ -54,12 +54,12 @@ function IndexPopup() {
           display: "flex",
           flexDirection: "column",
           padding: 16,
-          backgroundColor: "lightgreen",
+          backgroundColor: "#36454F",
           width: "250px",
           borderRadius: "5px"
         }}>
         <h2 className={style.h2}>
-          This extension only works with Coursera!
+          Please navigate to Coursera to use this extension.
         </h2>
       </div>
     )
