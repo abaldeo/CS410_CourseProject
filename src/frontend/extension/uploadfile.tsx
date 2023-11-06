@@ -8,7 +8,7 @@ export const FileUpload = ({closePopupUpload}) => {
         style={{
           display: "flex",
           flexDirection: "column",
-          backgroundColor: "lightgreen",
+          backgroundColor: "#0288d1",
           borderRadius: "5px"
         }}>
             <button className={style.button} onClick={closePopupUpload}>Close</button>
