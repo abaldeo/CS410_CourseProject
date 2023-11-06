@@ -15,7 +15,7 @@ export const FileUpload = ({closePopupUpload}) => {
             <form>
                 <h1 className={style.h1}>Lecture File Upload</h1>
                 <input type="file" multiple={true} className={style.input}/>
-                <button className={style.button} type="submit">Upload</button>
+                <button className={style.button} type="submit">Submit</button>
             </form>
         </div>
     )
