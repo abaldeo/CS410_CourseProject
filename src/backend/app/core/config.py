@@ -28,6 +28,12 @@ class Settings(object):
     EMBEDDING_REDIS_PORT: int = os.getenv("UPSTASH_REDIS_PORT")
     EMBEDDING_REDIS_PASSWD: str = os.getenv("UPSTASH_REDIS_PASSWORD")
 
+    SUMM_REDIS_URL: str = os.getenv("UPSTASH_REDIS_SUMM_REST_URL")
+    SUMM_REDIS_TOKEN: str = os.getenv("UPSTASH_REDIS_SUMM_REST_TOKEN")
+    SUMM_REDIS_HOST: str = os.getenv("UPSTASH_REDIS_SUMM_HOST")
+    SUMM_REDIS_PORT: int = os.getenv("UPSTASH_REDIS_SUMM_PORT")
+    SUMM_REDIS_PASSWD: str = os.getenv("UPSTASH_REDIS_SUMM_PASSWORD")
+
     GPT_MODEL_NAME: str = os.getenv("MODEL_NAME")   #TODO rename in env file 
     EMBEDDING_MODEL_NAME: str = os.getenv("EMBEDDING_MODEL_NAME")
     
