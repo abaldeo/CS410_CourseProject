@@ -4,7 +4,6 @@ from g4f import Provider, models
 from langchain.llms.base import LLM
 
 from langchain_g4f import G4FLLM
-print(g4f.Provider.Ails.params)  # supported args
 
 from langchain.document_loaders import (UnstructuredPDFLoader,
                                         UnstructuredPowerPointLoader,
@@ -12,12 +11,13 @@ from langchain.document_loaders import (UnstructuredPDFLoader,
                                         DirectoryLoader)
 from langchain.embeddings import HuggingFaceBgeEmbeddings
 from langchain.vectorstores import Zilliz
-
+from langchain.prompts.prompt import PromptTemplate
 
 # from dotenv import load_dotenv
-# import os
+import os
 from app.core.config import settings, get_settings 
 # load_dotenv()
+from loguru import logger
 
 ZILLIZ_CLOUD_COLLECTION_NAME = settings.ZILLIZ_CLOUD_COLLECTION_NAME
 ZILLIZ_CLOUD_URI = settings.ZILLIZ_CLOUD_URI
@@ -32,12 +32,12 @@ S3_ENDPOINT_URL = settings.S3_ENDPOINT_URL
 AWS_SECRET_ACCESS_KEY = settings.AWS_SECRET_ACCESS_KEY
 AWS_ACCESS_KEY_ID = settings.AWS_ACCESS_KEY_ID
 
-@functools.lru_cache()
-def create_vectorstore(embedding_model):
+
+def create_vectorstore(embedding_model, recreate=False):
     vectorstore = Zilliz(
         embedding_model,
         collection_name=ZILLIZ_CLOUD_COLLECTION_NAME,
-        drop_old=False,
+        drop_old=recreate,
         connection_args={
             "uri": ZILLIZ_CLOUD_URI,
             # "user": ZILLIZ_CLOUD_USERNAME,
@@ -119,16 +119,23 @@ def clean_text(text):
     import string, re 
     # from nltk.corpus import stopwords
     # Lowercase the text
-    text = text.lower()
+    text = text.lower().strip()
     text =  text.replace('[sound]','')
     text =  text.replace('[music]','')
-    text =  text.replace('[inaudible]','')
+    # text =  text.replace('[inaudible]','')
     
-   # Remove extra spaces
-    text = re.sub(r'[ |\t]', ' ', text).strip()
-    
+   # Remove extra spaces/lines
+    text = re.sub(r'[ |\t]+', ' ', text)
+    text = re.sub(r"\n+", "\n", text)
+
+    # lines = (line.strip() for line in text.splitlines())
+    # text = " ".join(iter(lines))
+    text = "\n".join((line for line in text.splitlines() if line.strip()))
+
+
+    punc_chars = string.punctuation.replace('.','')
     # remove punctuations
-    text = ''.join(c for c in text if c not in string.punctuation)
+    text = ''.join(c for c in text if c not in punc_chars)
     
     # # Remove stop words
     # stop_words = set(stopwords.words('english'))
@@ -136,10 +143,28 @@ def clean_text(text):
     
     return text
 
-def get_text_splitter( chunk_size=1000, chunk_overlap=100, **kwargs):
+def post_clean_text(text):
+    import re 
+    lines = (line.strip() for line in text.splitlines())
+    text = " ".join(iter(lines))
+    text = re.sub(r"\n+", " ", text)
+    return text 
+
+def get_text_splitter( chunk_size=1000, chunk_overlap=200, **kwargs):
     from langchain.text_splitter import RecursiveCharacterTextSplitter
-    text_splitter = RecursiveCharacterTextSplitter(chunk_size=chunk_size, chunk_overlap=chunk_overlap,
-                                                   	length_function = len, add_start_index = True, **kwargs)
+    text_splitter = RecursiveCharacterTextSplitter(chunk_size=chunk_size, chunk_overlap=chunk_overlap, 
+                                                   keep_separator=False, 
+                                                   length_function = len, add_start_index = True, **kwargs)
+    return text_splitter
+
+
+def get_text_splitter2(model_name, chunk_size=500, chunk_overlap=20, **kwargs):
+    from langchain.text_splitter import RecursiveCharacterTextSplitter
+    from app.api.api_v1.services.embedding.token_count import get_encoder_for_model
+    encoding = get_encoder_for_model(model_name).name
+    text_splitter = RecursiveCharacterTextSplitter.from_tiktoken_encoder(encoding, keep_separator=False,
+                                                   chunk_size=chunk_size, chunk_overlap=chunk_overlap,
+                                                   add_start_index = True,  **kwargs)
     return text_splitter
 
 def get_token_splitter(model_name, chunk_size=500, chunk_overlap=20, **kwargs): 
@@ -151,28 +176,42 @@ def get_token_splitter(model_name, chunk_size=500, chunk_overlap=20, **kwargs):
     return token_splitter
 
 # Chunk data
-def chunk_docs(docs,text_splitter, clean=True):
+def chunk_docs(docs,text_splitter, clean=True, post_clean=True):
     if not isinstance(docs, list): docs = [docs]  
     if clean:  clean_documents(docs)          
     chunks = text_splitter.split_documents(docs)
-    # if clean:  clean_documents(chunks)    
+    add_chunk_metadata(chunks)
+    if post_clean:  clean_documents(chunks, post_clean_text)    
     return chunks
 
-def chunk_texts(texts, text_splitter, clean=True):
+def add_chunk_metadata(chunks):
+    number = 1
+    current_doc = ''
+    for chunk in chunks:
+        if current_doc != chunk.metadata.get('document_id',''):
+            number = 1
+        current_doc = chunk.metadata.get('document_id', '')
+        chunk.metadata['chunk_id'] = get_hash_id(chunk.page_content)
+        chunk.metadata['chunk_number'] = number
+        number+=1
+    
+
+def chunk_texts(texts, text_splitter, clean=True,post_clean=True):
     if clean: texts = clean_text(texts)        
     if not isinstance(texts, list): texts = [texts]            
     chunks = text_splitter.create_documents(texts)
-    # if clean: chunks = clean_texts(texts)        
+    if post_clean: chunks = post_clean_text(texts)        
     return chunks
 
 # def clean_texts(texts):
 #     texts = [clean_text(text) for text in texts]
 #     return texts
 
-def clean_documents(documents):
+def clean_documents(documents, clean_func=clean_text):
     # Iterate over texts page_content category with this cleaning method.
     for doc in documents:
-        doc.page_content = clean_text(doc.page_content)
+        doc.page_content = clean_func(doc.page_content)
+
 
 @functools.lru_cache()
 def get_embedding_model(model_name="BAAI/bge-base-en-v1.5" ):
@@ -197,12 +236,53 @@ def create_query_embeddings(query_text, embedding_model):
 
 def create_qa_chain(llm, vectorstore):
     from langchain.chains import RetrievalQA
-    QA_CHAIN_PROMPT=""
+    import textwrap 
+    QA_CHAIN_PROMPT=textwrap.dedent("""You are a helpful assistant, you will use the provided context to answer user questions. 
+    Read the given context before answering questions and think step by step.
+    Use the following pieces of context to answer the question at the end. 
+    If you don't know the answer, just say that you don't know, don't try to make up an answer.
+    Context: {context}
+    Question: {question}
+    Helpful Answer:""")
+    print(QA_CHAIN_PROMPT)
+    prompt_template = PromptTemplate(template=QA_CHAIN_PROMPT, input_variables=["context", "question"])
     qa_chain = RetrievalQA.from_chain_type(
     llm,
-    retriever=vectorstore.as_retriever(),
+    retriever=vectorstore.as_retriever(search_type="mmr", search_kwargs={'k': 4, 'fetch_k': 10}),
+    return_source_documents=False,
+    input_key="question",
+    output_key="answer",
+    chain_type_kwargs={"prompt": prompt_template})
+    return qa_chain 
+
+
+def create_qa_chain_with_sources(llm, vectorstore):
+    from langchain.chains import RetrievalQAWithSourcesChain
+    import textwrap 
+    QA_CHAIN_PROMPT=textwrap.dedent("""You are a helpful assistant, you will use the provided context to answer user questions. 
+    Read the given context before answering questions and think step by step.
+    Given the following extracted parts of a long document and a question, create a final answer with references ("SOURCES"). 
+    If you don't know the answer, just say that you don't know, don't try to make up an answer.
+    ALWAYS return a "SOURCES" part in your answer.
+    CONTEXT: 
+    =========
+    {summaries}
+    =========
+    QUESTION: {question}
+    ANSWER:""")
+    print(QA_CHAIN_PROMPT)
+    prompt_template = PromptTemplate(
+    template=QA_CHAIN_PROMPT, input_variables=["summaries", "question"]
+    )
+    qa_chain = RetrievalQAWithSourcesChain.from_chain_type(
+    llm,
+    retriever=vectorstore.as_retriever(
+       search_type="mmr", search_kwargs={'k': 4, 'fetch_k': 10}
+        # search_type="similarity", search_kwargs={'k': 4}
+    ),
     return_source_documents=True,
-    chain_type_kwargs={"prompt": QA_CHAIN_PROMPT})
+    chain_type_kwargs={"prompt": prompt_template}
+    )
     return qa_chain 
 
 def create_conversation_chain(llm, vectorstore, memory):
@@ -214,33 +294,160 @@ def create_memory():
     return ConversationBufferMemory(memory_key="chat_history", return_messages=True)
 
 
+def load_all_docs(directory_path):
+    loaders = get_loaders(directory_path)
+    documents = []
+    for loader in loaders:
+        documents.extend(loader.load())
+    return documents
+
+def ingest_documents(directory_path="/workspace/CS410_CourseProject/src/backend/data/transcripts/",
+                     file_ext=".txt",
+                     gpt_model='gpt-3.5-turbo', 
+                     embedding_model="BAAI/bge-base-en-v1.5",
+                     recreate_vectorstore=False,
+                     split_seperators=None):
+    import textwrap 
+    from app.api.api_v1.services.embedding.utils import timer
+    
+    if not split_seperators: split_seperators = ['.','\n','\n\n']
+    loader = create_directory_loader(file_ext, directory_path)
+    documents = loader.load()
+    text_splitter = get_text_splitter2(gpt_model,separators=split_seperators)
+    chunks = chunk_docs(documents, text_splitter)
+    model = get_embedding_model(embedding_model)
+    vector_db = create_vectorstore(embedding_model=model, recreate=recreate_vectorstore)
+    with timer() as t:
+        vector_db.add_documents(chunks)    
+
+def extract_metadata_from_filename(filename):
+    import re 
+     # Split the filename into parts using hyphen as the separator
+    # parts = filename.split("-")
+
+    # Extract the lecture ID from the second part
+    try:
+        match = re.search(r"(\d+-\d+)", filename)
+        lecture_number  = match.group(0).replace('-','.').strip()
+    except Exception:
+        logger.warning(f"Could not extract lecture number from filename {filename}")
+        lecture_number = 'n/a'
+
+    # Extract the week number from the first part
+    try:
+        match = re.search(r"(\d+)_", filename)
+        week_number = match.group(0).replace("_", "").strip()
+        if lecture_number != 'n/a':
+            lecture_week  =lecture_number.split(".")[0]
+            if int(week_number) < int(lecture_week):
+                week_number = lecture_week
+    except Exception:
+        logger.warning("Could not extract week number from filename {}", filename)
+        week_number = "n/a"
+
+    # Extract the lecture name from the remaining parts
+    try:
+        # lecture_title= " ".join(parts[4:]).split(".")[0]
+        # lecture_title = lecture_title.title()
+        match = re.search(r'-(\D+).+\.', filename)
+        lecture_title = match.group(0).replace('-',' ').strip().title()
+        lecture_title = lecture_title.split('.')[0]
+    except Exception:
+        logger.warning(f"Could not extract lecture name from filename {filename}")
+        lecture_title = 'n/a'
+    # Return a tuple of the week number, lecture ID, and lecture name
+    return (week_number, lecture_number, lecture_title)
+
+
+def get_hash_id(text: str):
+    import hashlib 
+    return hashlib.md5(text.encode("utf-8")).hexdigest()
+
+
+def enrich_document_metadata(documents):
+    for doc in documents:
+        metadata = doc.metadata
+        metadata['document_id'] = metadata.get('id',  get_hash_id(doc.page_content) )
+        doc.metadata["week_number"] = ''
+        doc.metadata["lecture_number"] = ''
+        doc.metadata["lecture_title"] = ''
+
+        source = metadata.get('source')
+        if source:
+            filename = os.path.basename(source)
+            ext = os.path.splitext(filename)[-1]
+            if ext == ".txt":
+                week_number, lecture_number, lecture_title = extract_metadata_from_filename(filename)
+                doc.metadata['week_number'] = week_number
+                doc.metadata['lecture_number'] = lecture_number
+                doc.metadata['lecture_title'] = lecture_title
+
+
 def main():
-    file='/workspace/CS410_CourseProject/src/backend/data/transcripts/01_10-1-text-clustering-motivation.en.txt'
-    doc = load_document(file)
+    import textwrap 
+    # file='/workspace/CS410_CourseProject/src/backend/data/transcripts/01_10-1-text-clustering-motivation.en.txt'
+    # doc = load_document(file)
     # print(doc)
-    text_splitter = get_text_splitter()
-    # text_splitter = get_token_splitter("gpt-3.5-turbo")
-    # chunks = chunk_texts(doc[0].page_content, text_splitter)
-    chunks = chunk_docs(doc, text_splitter)
-    # [print(len(chunk.page_content)) for chunk in chunks]
+        
+    # directory_path = '/workspace/CS410_CourseProject/src/backend/data/transcripts/'
+    # loader = DirectoryLoader(directory_path, glob="**/*txt", loader_cls=TextLoader, 
+    #                                                             loader_kwargs={"encoding": "utf-8"}, use_multithreading=True,
+    #                                                             show_progress=False)
+
+    # documents = loader.load()
+    # enrich_document_metadata(documents)
+    # # for doc in documents:
+    # #     print(doc.metadata)
+
+  
+    # # text_splitter = get_text_splitter(chunk_size=1000, chunk_overlap=200, separators=['.','\n','\n\n'])
+    # text_splitter = get_text_splitter2("gpt4",separators=['.','\n','\n\n'])
+    # # text_splitter = get_token_splitter("gpt4")
+    # # chunks = chunk_texts(doc[0].page_content, text_splitter)
+    # chunks = chunk_docs(documents, text_splitter)
+    # # print(chunks)
+    # # [print(textwrap.fill(chunk.page_content, 120) +  '\n' + '-'*20) for chunk in chunks]
+    
     model = get_embedding_model()
-    print(model.model_name)
+    # print(model.model_name)
+    
     # from app.api.api_v1.services.embedding.utils import timer
+    # # with timer() as t:
+    # #     vectors = create_doc_embeddings(chunks, model)
+    # # print(len(vectors))
+    
+    vector_db = create_vectorstore(embedding_model=model, recreate=False)
+    
     # with timer() as t:
-    #     vectors = create_doc_embeddings(chunks, model)
- 
-    # print(len(vectors))
-    vector_db = create_vectorstore(embedding_model=model)
-    # vector_db.add_documents(chunks)
-    print(vector_db.similarity_search("text clustering", top_k=2))
-    # llm: LLM = G4FLLM(
-    #     model=models.gpt_35_turbo,
-    #     provider=Provider.ChatForAi,
+    #     vector_db.add_documents(chunks)
+    
+    # print(vector_db.similarity_search("text clustering", top_k=5))
+        
+    g4f.debug.logging = False # enable logging
+    g4f.check_version = False # Disable automatic version checking
+    print(g4f.version) # check version
+    print(g4f.Provider.Ails.params)  # supported args
+
+    # streamed completion
+    # RESPONSE = g4f.ChatCompletion.create(
+    #     model="gpt-3.5-turbo",
+    #     messages=[{"role": "user", "content": "Hello"}],
+    #     stream=True,
     # )
+
+    # for message in RESPONSE:
+    #     print(message, flush=True, end="")
+
+    llm: LLM = G4FLLM(
+        model=models.gpt_35_turbo,
+        provider=None
+    )
 
     # res = llm("hello")
     # print(res)  # Hello! How can I assist you today?
-    
+    qa = create_qa_chain_with_sources(llm, vector_db)
+    answer=qa({"question":"What is text clustering"})
+    print(answer)
 
 if __name__ == "__main__":
     main() 

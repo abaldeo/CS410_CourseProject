@@ -44,3 +44,32 @@ class DocumentLoader:
         )
 
         return splitter.split_documents(document)
+
+
+
+from typing import List, Optional
+
+
+class CleanTextLoader(TextLoader):
+    """Load text files."""
+
+    def __init__(self, file_path: str, encoding: Optional[str] = None):
+        """Initialize with file path."""
+        self.file_path = file_path
+        self.encoding = encoding
+
+    def load(self) -> List[Document]:
+        """Load from file path."""
+        with open(self.file_path, encoding=self.encoding) as f:
+            text = f.read()
+        text = self.clean_text(text)
+        metadata = {"source": self.file_path}
+        return [Document(page_content=text, metadata=metadata)]
+
+    @staticmethod
+    def clean_text(text):
+        lines = (line.strip() for line in text.splitlines())
+        text = " ".join(iter(lines))
+        text = " ".join(text.split())
+        text = "\n".join((line for line in text.splitlines() if line.strip()))
+        return text
