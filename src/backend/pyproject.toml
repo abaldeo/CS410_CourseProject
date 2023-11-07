@@ -33,7 +33,7 @@ dependencies = [
     "PyMuPDF>=1.23.5",
     "sentence-transformers>=2.2.2",
     "orjson>=3.9.9",
-    "boto3>=1.28.72",
+    "boto3>=1.28.16",
     "unstructured>=0.10.27",
     "upstash-redis>=0.15.0",
     "langchain-g4f @ git+https://github.com/AlexanderKorataev/langchain-gpt4free.git",
@@ -44,6 +44,7 @@ dependencies = [
     "asyncpg>=0.28.0",
     "pydantic==1.10.13",
     "loguru>=0.7.2",
+    "aioboto3>=12.0.0",
 ]
 requires-python = ">=3.11,<3.12"
 readme = "../../README.md"
