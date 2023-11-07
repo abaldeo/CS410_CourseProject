@@ -32,11 +32,12 @@ async def upload_summary_to_s3(course_name: str, transcript_name: str, summary_t
         transcript_name (str): video's transcript that's being summarized
         summary_text (str): Summary of transcript
     """
+
     session = aioboto3.Session()
     client = session.client(
         's3', 
         config=botocore.config.Config(s3={'addressing_style': 'virtual'}), 
-        region_name='nyc3', 
+        region_name=settings.AWS_REGION_NAME, 
         endpoint_url=settings.S3_ENDPOINT_URL, 
         aws_access_key_id=settings.AWS_ACCESS_KEY_ID, 
         aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY
@@ -44,8 +45,8 @@ async def upload_summary_to_s3(course_name: str, transcript_name: str, summary_t
 
     # Upload the transcript text to DigitalOcean Spaces
     await client.put_object(
-        Bucket=settings.S3_SUMMARY_BUCKET_NAME, 
-        Key=f"{course_name}/{transcript_name}.txt", 
+        Bucket=settings.S3_BUCKET_NAME, 
+        Key=f"coursebuddy/cs410/summaries/{course_name}/{transcript_name}", 
         Body=summary_text, 
         ACL='private', 
         Metadata={
@@ -133,22 +134,24 @@ def generate_summary(txt_to_summarize: Document, gpt_model_name: str) -> str:
     Returns:
         str: Returns summarization of the transcript
     """
-    llm = ChatOpenAI(temperature=0, model_name=gpt_model_name)
+    llm = ChatOpenAI(temperature=0, model_name=gpt_model_name, openai_api_key="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")
 
     # Remove spaces and new lines from text to summarize
     cleaned_txt = re.sub(r'[ |\t]+', ' ', txt_to_summarize.page_content)
     cleaned_txt = re.sub(r"\n+", "\n", cleaned_txt)
     txt_to_summarize.page_content = cleaned_txt
 
-    # Chunk data
-    text_splitter = get_text_splitter2(gpt_model_name, chunk_size=4096, chunk_overlap=0)
-    chunks = chunk_docs(txt_to_summarize, text_splitter=text_splitter)
-
-    # Create prompts
     chunk_summary_template = """
         Summarize this chunk of text that includes the main points and important details. {text}
     """
+    prompt_token_amount = llm.get_num_tokens(chunk_summary_template)
+    chunk_size = 4096 - prompt_token_amount # Ensures chunk + prompt < 4096 which is max chunk size
 
+    # Chunk data
+    text_splitter = get_text_splitter2(gpt_model_name, chunk_size=chunk_size, chunk_overlap=0)
+    chunks = chunk_docs(txt_to_summarize, text_splitter=text_splitter)
+
+    # Create prompts and templates
     chunk_summary_prompt = PromptTemplate(
         template=chunk_summary_template, 
         input_variables=["text"]
@@ -172,7 +175,7 @@ def generate_summary(txt_to_summarize: Document, gpt_model_name: str) -> str:
         chain_type="map_reduce", 
         return_intermediate_steps=False
     )
-    num_of_tokens = llm.get_num_tokens(txt_to_summarize)
+    num_of_tokens = llm.get_num_tokens(txt_to_summarize.page_content)
     num_of_bullet_points = -(num_of_tokens // -200) # Equivalent of math.ceil()
     summary = map_reduce_chain.run(**{'input_documents': chunks, 'num_bullet_points': num_of_bullet_points})
     return summary

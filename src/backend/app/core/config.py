@@ -20,7 +20,6 @@ class Settings(object):
     AWS_SECRET_ACCESS_KEY: str= os.getenv("AWS_SECRET_ACCESS_KEY")
     AWS_ACCESS_KEY_ID: str = os.getenv("AWS_ACCESS_KEY_ID")
     S3_BUCKET_NAME: str = os.getenv("BUCKET_NAME", "coursebuddy") #TODO rename in env file
-    S3_SUMMARY_BUCKET_NAME = os.getenv("SUMMARY_BUCKET_NAME", "coursebuddysummary")
     S3_ENDPOINT_URL: str = os.getenv("ENDPOINT_URL") #TODO Rename in env file
     
     EMBEDDING_REDIS_URL: str = os.getenv("UPSTASH_REDIS_REST_URL")
