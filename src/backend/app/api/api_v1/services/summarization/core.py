@@ -134,7 +134,7 @@ def generate_summary(txt_to_summarize: Document, gpt_model_name: str) -> str:
     Returns:
         str: Returns summarization of the transcript
     """
-    llm = ChatOpenAI(temperature=0, model_name=gpt_model_name, openai_api_key="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")
+    llm = ChatOpenAI(temperature=0, model_name=gpt_model_name)
 
     # Remove spaces and new lines from text to summarize
     cleaned_txt = re.sub(r'[ |\t]+', ' ', txt_to_summarize.page_content)
