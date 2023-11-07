@@ -4,7 +4,6 @@ from g4f import Provider, models
 from langchain.llms.base import LLM
 
 from langchain_g4f import G4FLLM
-print(g4f.Provider.Ails.params)  # supported args
 
 from langchain.document_loaders import (UnstructuredPDFLoader,
                                         UnstructuredPowerPointLoader,
@@ -12,7 +11,7 @@ from langchain.document_loaders import (UnstructuredPDFLoader,
                                         DirectoryLoader)
 from langchain.embeddings import HuggingFaceBgeEmbeddings
 from langchain.vectorstores import Zilliz
-
+from langchain.prompts.prompt import PromptTemplate
 
 # from dotenv import load_dotenv
 import os
@@ -237,12 +236,53 @@ def create_query_embeddings(query_text, embedding_model):
 
 def create_qa_chain(llm, vectorstore):
     from langchain.chains import RetrievalQA
-    QA_CHAIN_PROMPT=""
+    import textwrap 
+    QA_CHAIN_PROMPT=textwrap.dedent("""You are a helpful assistant, you will use the provided context to answer user questions. 
+    Read the given context before answering questions and think step by step.
+    Use the following pieces of context to answer the question at the end. 
+    If you don't know the answer, just say that you don't know, don't try to make up an answer.
+    Context: {context}
+    Question: {question}
+    Helpful Answer:""")
+    print(QA_CHAIN_PROMPT)
+    prompt_template = PromptTemplate(template=QA_CHAIN_PROMPT, input_variables=["context", "question"])
     qa_chain = RetrievalQA.from_chain_type(
     llm,
-    retriever=vectorstore.as_retriever(),
+    retriever=vectorstore.as_retriever(search_type="mmr", search_kwargs={'k': 4, 'fetch_k': 10}),
+    return_source_documents=False,
+    input_key="question",
+    output_key="answer",
+    chain_type_kwargs={"prompt": prompt_template})
+    return qa_chain 
+
+
+def create_qa_chain_with_sources(llm, vectorstore):
+    from langchain.chains import RetrievalQAWithSourcesChain
+    import textwrap 
+    QA_CHAIN_PROMPT=textwrap.dedent("""You are a helpful assistant, you will use the provided context to answer user questions. 
+    Read the given context before answering questions and think step by step.
+    Given the following extracted parts of a long document and a question, create a final answer with references ("SOURCES"). 
+    If you don't know the answer, just say that you don't know, don't try to make up an answer.
+    ALWAYS return a "SOURCES" part in your answer.
+    CONTEXT: 
+    =========
+    {summaries}
+    =========
+    QUESTION: {question}
+    ANSWER:""")
+    print(QA_CHAIN_PROMPT)
+    prompt_template = PromptTemplate(
+    template=QA_CHAIN_PROMPT, input_variables=["summaries", "question"]
+    )
+    qa_chain = RetrievalQAWithSourcesChain.from_chain_type(
+    llm,
+    retriever=vectorstore.as_retriever(
+       search_type="mmr", search_kwargs={'k': 4, 'fetch_k': 10}
+        # search_type="similarity", search_kwargs={'k': 4}
+    ),
     return_source_documents=True,
-    chain_type_kwargs={"prompt": QA_CHAIN_PROMPT})
+    chain_type_kwargs={"prompt": prompt_template}
+    )
     return qa_chain 
 
 def create_conversation_chain(llm, vectorstore, memory):
@@ -349,48 +389,65 @@ def main():
     # doc = load_document(file)
     # print(doc)
         
-    directory_path = '/workspace/CS410_CourseProject/src/backend/data/transcripts/'
-    loader = DirectoryLoader(directory_path, glob="**/*txt", loader_cls=TextLoader, 
-                                                                loader_kwargs={"encoding": "utf-8"}, use_multithreading=True,
-                                                                show_progress=False)
+    # directory_path = '/workspace/CS410_CourseProject/src/backend/data/transcripts/'
+    # loader = DirectoryLoader(directory_path, glob="**/*txt", loader_cls=TextLoader, 
+    #                                                             loader_kwargs={"encoding": "utf-8"}, use_multithreading=True,
+    #                                                             show_progress=False)
 
-    documents = loader.load()
-    enrich_document_metadata(documents)
-    # for doc in documents:
-    #     print(doc.metadata)
+    # documents = loader.load()
+    # enrich_document_metadata(documents)
+    # # for doc in documents:
+    # #     print(doc.metadata)
 
   
-    # text_splitter = get_text_splitter(chunk_size=1000, chunk_overlap=200, separators=['.','\n','\n\n'])
-    text_splitter = get_text_splitter2("gpt4",separators=['.','\n','\n\n'])
-    # text_splitter = get_token_splitter("gpt4")
-    # chunks = chunk_texts(doc[0].page_content, text_splitter)
-    chunks = chunk_docs(documents, text_splitter)
-    # print(chunks)
-    # [print(textwrap.fill(chunk.page_content, 120) +  '\n' + '-'*20) for chunk in chunks]
+    # # text_splitter = get_text_splitter(chunk_size=1000, chunk_overlap=200, separators=['.','\n','\n\n'])
+    # text_splitter = get_text_splitter2("gpt4",separators=['.','\n','\n\n'])
+    # # text_splitter = get_token_splitter("gpt4")
+    # # chunks = chunk_texts(doc[0].page_content, text_splitter)
+    # chunks = chunk_docs(documents, text_splitter)
+    # # print(chunks)
+    # # [print(textwrap.fill(chunk.page_content, 120) +  '\n' + '-'*20) for chunk in chunks]
     
     model = get_embedding_model()
-    print(model.model_name)
+    # print(model.model_name)
     
-    from app.api.api_v1.services.embedding.utils import timer
+    # from app.api.api_v1.services.embedding.utils import timer
+    # # with timer() as t:
+    # #     vectors = create_doc_embeddings(chunks, model)
+    # # print(len(vectors))
+    
+    vector_db = create_vectorstore(embedding_model=model, recreate=False)
+    
     # with timer() as t:
-    #     vectors = create_doc_embeddings(chunks, model)
-    # print(len(vectors))
-    
-    vector_db = create_vectorstore(embedding_model=model, recreate=True)
-    
-    with timer() as t:
-        vector_db.add_documents(chunks)
+    #     vector_db.add_documents(chunks)
     
     # print(vector_db.similarity_search("text clustering", top_k=5))
-    
-    # llm: LLM = G4FLLM(
-    #     model=models.gpt_35_turbo,
-    #     provider=Provider.ChatForAi,
+        
+    g4f.debug.logging = False # enable logging
+    g4f.check_version = False # Disable automatic version checking
+    print(g4f.version) # check version
+    print(g4f.Provider.Ails.params)  # supported args
+
+    # streamed completion
+    # RESPONSE = g4f.ChatCompletion.create(
+    #     model="gpt-3.5-turbo",
+    #     messages=[{"role": "user", "content": "Hello"}],
+    #     stream=True,
     # )
+
+    # for message in RESPONSE:
+    #     print(message, flush=True, end="")
+
+    llm: LLM = G4FLLM(
+        model=models.gpt_35_turbo,
+        provider=None
+    )
 
     # res = llm("hello")
     # print(res)  # Hello! How can I assist you today?
-    
+    qa = create_qa_chain_with_sources(llm, vector_db)
+    answer=qa({"question":"What is text clustering"})
+    print(answer)
 
 if __name__ == "__main__":
     main() 
