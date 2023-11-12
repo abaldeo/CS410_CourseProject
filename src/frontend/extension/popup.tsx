@@ -32,7 +32,7 @@ function IndexPopup() {
     getCurrentUsername()
   }, [currentUrl, currentUsername])
   
-  if (currentUrl.includes("coursera.org")) {
+  if (currentUrl.includes("coursera.org/learn")) {
     return (
       <div className={style.div}>
         <button className={style.settingsButton} value="settings">
