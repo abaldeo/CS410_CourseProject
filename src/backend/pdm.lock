@@ -3,11 +3,10 @@
 
 [metadata]
 groups = ["default"]
-
 cross_platform = true
 static_urls = false
 lock_version = "4.3"
-content_hash = "sha256:f1e6c6166fca13bda2f698906631252013d4d915a908a1cec06efc3707df4abd"
+content_hash = "sha256:4e25cc232be273bb2d4753445b705a6aad6b75124370934b9f132ab03d07fea9"
 
 [[package]]
 name = "aioboto3"
@@ -16,20 +15,6 @@ requires_python = ">=3.8,<4.0"
 summary = "Async boto3 wrapper"
 dependencies = [
     "aiobotocore[boto3]==2.7.0",
-]
-files = [
-    {file = "aioboto3-12.0.0-py3-none-any.whl", hash = "sha256:23895e734f83e34827a38d3a08ccc3f4178cc8d4e3a7b7031a0cbf8efc875555"},
-    {file = "aioboto3-12.0.0.tar.gz", hash = "sha256:c2bbb990b4efd2e474a1e8a42a80291faf6434b2dc8678f163208d338b2dba39"},
-]
-
-[[package]]
-name = "aioboto3"
-version = "12.0.0"
-extras = ["boto3"]
-requires_python = ">=3.8,<4.0"
-summary = "Async boto3 wrapper"
-dependencies = [
-    "aioboto3==12.0.0",
 ]
 files = [
     {file = "aioboto3-12.0.0-py3-none-any.whl", hash = "sha256:23895e734f83e34827a38d3a08ccc3f4178cc8d4e3a7b7031a0cbf8efc875555"},
@@ -66,7 +51,6 @@ files = [
     {file = "aiobotocore-2.7.0-py3-none-any.whl", hash = "sha256:aec605df77ce4635a0479b50fd849aa6b640900f7b295021ecca192e1140e551"},
     {file = "aiobotocore-2.7.0.tar.gz", hash = "sha256:506591374cc0aee1bdf0ebe290560424a24af176dfe2ea7057fe1df97c4f0467"},
 ]
-
 
 [[package]]
 name = "aiohttp"
@@ -2488,6 +2472,18 @@ files = [
     {file = "PyYAML-6.0.1-cp312-cp312-win32.whl", hash = "sha256:d483d2cdf104e7c9fa60c544d92981f12ad66a457afae824d146093b8c294c54"},
     {file = "PyYAML-6.0.1-cp312-cp312-win_amd64.whl", hash = "sha256:0d3304d8c0adc42be59c5f8a4d9e3d7379e6955ad754aa9d6ab7a398b59dd1df"},
     {file = "PyYAML-6.0.1.tar.gz", hash = "sha256:bfdf460b1736c775f2ba9f6a92bca30bc2095067b8a9d77876d1fad6cc3b4a43"},
+]
+
+[[package]]
+name = "rank-bm25"
+version = "0.2.2"
+summary = "Various BM25 algorithms for document ranking"
+dependencies = [
+    "numpy",
+]
+files = [
+    {file = "rank_bm25-0.2.2-py3-none-any.whl", hash = "sha256:7bd4a95571adadfc271746fa146a4bcfd89c0cf731e49c3d1ad863290adbe8ae"},
+    {file = "rank_bm25-0.2.2.tar.gz", hash = "sha256:096ccef76f8188563419aaf384a02f0ea459503fdf77901378d4fd9d87e5e51d"},
 ]
 
 [[package]]

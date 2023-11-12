@@ -52,6 +52,13 @@ class Settings(object):
     SEARCH_TYPE: str = os.getenv("RAG_SEARCH_TYPE") 
     TOP_K: int = os.getenv("RAG_TOP_K")
     FETCH_K: int = os.getenv("RAG_FETCH_K")
+    ENABLE_HYBRID_SEARCH: bool = bool(int(os.getenv("RAG_ENABLE_HYBRID_SEARCH")))
+    MMR_SIMILARITY: float = os.getenv("RAG_MMR_SIMILARITY")
+    BM25_WEIGHT: float = os.getenv("RAG_BM25_WEIGHT")
+    BM25_K1: float = os.getenv("RAG_BM25_K1")
+    BM25_B: float = os.getenv("RAG_BM25_B")
+    BM25_EPSILON: float = os.getenv("RAG_BM25_EPSILON")
+
 
 @lru_cache
 def get_settings():
