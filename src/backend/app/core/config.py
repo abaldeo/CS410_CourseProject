@@ -40,7 +40,19 @@ class Settings(object):
     ENVIRONMENT: str = os.getenv("ENVIRONMENT")
     CELERY_BROKER_URL: str = os.getenv("CELERY_BROKER_URL", "redis://redis:6379/0")
 
+    LLM_PROVIDER: str = os.getenv("LLM_PROVIDER")
+    OPENAI_API_KEY: str = os.getenv("OPENAI_API_KEY")
+    OPENAI_API_BASE: str = os.getenv("OPENAI_API_BASE")
+    OPENAI_API_VERSION: str =  os.getenv("OPENAI_API_VERSION")
     
+    AZURE_OPENAI_API_KEY: str = OPENAI_API_KEY
+    AZURE_OPENAI_API_ENDPOINT: str = OPENAI_API_BASE
+    AZURE_OPENAI_MODEL_VERSION: str = os.getenv("AZURE_OPENAI_MODEL_VERSION")
+    
+    SEARCH_TYPE: str = os.getenv("RAG_SEARCH_TYPE") 
+    TOP_K: int = os.getenv("RAG_TOP_K")
+    FETCH_K: int = os.getenv("RAG_FETCH_K")
+
 @lru_cache
 def get_settings():
     return Settings()

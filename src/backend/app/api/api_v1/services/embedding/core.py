@@ -234,66 +234,6 @@ def create_text_embeddings(text_chunks, embedding_model):
 def create_query_embeddings(query_text, embedding_model):
     return embedding_model.embed_query(query_text)
 
-def create_qa_chain(llm, vectorstore):
-    from langchain.chains import RetrievalQA
-    import textwrap 
-    QA_CHAIN_PROMPT=textwrap.dedent("""You are a helpful assistant, you will use the provided context to answer user questions. 
-    Read the given context before answering questions and think step by step.
-    Use the following pieces of context to answer the question at the end. 
-    If you don't know the answer, just say that you don't know, don't try to make up an answer.
-    Context: {context}
-    Question: {question}
-    Helpful Answer:""")
-    print(QA_CHAIN_PROMPT)
-    prompt_template = PromptTemplate(template=QA_CHAIN_PROMPT, input_variables=["context", "question"])
-    qa_chain = RetrievalQA.from_chain_type(
-    llm,
-    retriever=vectorstore.as_retriever(search_type="mmr", search_kwargs={'k': 4, 'fetch_k': 10}),
-    return_source_documents=False,
-    input_key="question",
-    output_key="answer",
-    chain_type_kwargs={"prompt": prompt_template})
-    return qa_chain 
-
-
-def create_qa_chain_with_sources(llm, vectorstore):
-    from langchain.chains import RetrievalQAWithSourcesChain
-    import textwrap 
-    QA_CHAIN_PROMPT=textwrap.dedent("""You are a helpful assistant, you will use the provided context to answer user questions. 
-    Read the given context before answering questions and think step by step.
-    Given the following extracted parts of a long document and a question, create a final answer with references ("SOURCES"). 
-    If you don't know the answer, just say that you don't know, don't try to make up an answer.
-    ALWAYS return a "SOURCES" part in your answer.
-    CONTEXT: 
-    =========
-    {summaries}
-    =========
-    QUESTION: {question}
-    ANSWER:""")
-    print(QA_CHAIN_PROMPT)
-    prompt_template = PromptTemplate(
-    template=QA_CHAIN_PROMPT, input_variables=["summaries", "question"]
-    )
-    qa_chain = RetrievalQAWithSourcesChain.from_chain_type(
-    llm,
-    retriever=vectorstore.as_retriever(
-       search_type="mmr", search_kwargs={'k': 4, 'fetch_k': 10}
-        # search_type="similarity", search_kwargs={'k': 4}
-    ),
-    return_source_documents=True,
-    chain_type_kwargs={"prompt": prompt_template}
-    )
-    return qa_chain 
-
-def create_conversation_chain(llm, vectorstore, memory):
-    from langchain.chains import ConversationalRetrievalChain    
-    return ConverationalRetrievalChain.from_llm(llm=llm, retriever= vectorstore.as_retriever(), memory=memory)
-
-def create_memory():
-    from langchain.memory import ConversationBufferMemory
-    return ConversationBufferMemory(memory_key="chat_history", return_messages=True)
-
-
 def load_all_docs(directory_path):
     loaders = get_loaders(directory_path)
     documents = []
@@ -383,6 +323,111 @@ def enrich_document_metadata(documents):
                 doc.metadata['lecture_title'] = lecture_title
 
 
+def get_llm(model=settings.GPT_MODEL_NAME, provider=settings.LLM_PROVIDER, **kwargs):
+    provider = str(provider).lower() 
+    model = str(model).lower()
+    if "g4f" in provider:
+        llm: LLM = G4FLLM(
+            model=models.gpt_35_turbo, 
+            provider=None,
+            **kwargs 
+        )
+    elif "azure" in provider:
+        from langchain.llms import AzureOpenAI
+        kwargs.setdefault("azure_open_api_key", settings.OPENAI_API_KEY)
+        kwargs.setdefault("azure_openai_api_endpoint", settings.OPENAI_API_BASE)
+        kwargs.setdefault("openai_api_version", settings.OPENAI_API_VERSION)
+        kwargs.setdefault("model_version", settings.AZURE_OPENAI_MODEL_VERSION)
+        llm: LLM = AzureOpenAI(model_name=model, **kwargs)
+    else:
+        from langchain.llms  import ChatOpenAI
+        
+        llm: LLM = ChatOpenAI(model_name=model, **kwargs)
+    return llm 
+
+def create_qa_chain(llm, vectorstore):
+    from langchain.chains import RetrievalQA
+    import textwrap 
+    QA_CHAIN_PROMPT=textwrap.dedent("""You are a helpful assistant, you will use the provided context to answer user questions. 
+    Read the given context before answering questions and think step by step.
+    Use the following pieces of context to answer the question at the end. 
+    If you don't know the answer, just say that you don't know, don't try to make up an answer.
+    Context: {context}
+    Question: {question}
+    Helpful Answer:""")
+    print(QA_CHAIN_PROMPT)
+    prompt_template = PromptTemplate(template=QA_CHAIN_PROMPT, input_variables=["context", "question"])
+    qa_chain = RetrievalQA.from_chain_type(
+    llm,
+    retriever=vectorstore.as_retriever(search_type="mmr", search_kwargs={'k': 4, 'fetch_k': 10}),
+    return_source_documents=False,
+    input_key="question",
+    output_key="answer",
+    chain_type_kwargs={"prompt": prompt_template})
+    return qa_chain 
+
+
+def create_qa_chain_with_sources(llm, vectorstore):
+    from langchain.chains import RetrievalQAWithSourcesChain
+    from langchain.prompts import ChatPromptTemplate, SystemMessagePromptTemplate, HumanMessagePromptTemplate    
+    import textwrap 
+    QA_CHAIN_PROMPT=textwrap.dedent("""You are a helpful assistant, you will use the provided context to answer user questions. 
+    Read the given context before answering questions and think step by step.
+    Given the following extracted parts of a long document and a question, create a final answer with references ("SOURCES"). 
+    If you don't know the answer, just say that you don't know, don't try to make up an answer.
+    ALWAYS return a "SOURCES" part in your answer.
+    CONTEXT: 
+    =========
+    {summaries}
+    =========
+    QUESTION: {question}
+    ANSWER:""")
+
+    prompt_template = PromptTemplate(
+    template=QA_CHAIN_PROMPT, input_variables=["summaries", "question"]
+    )
+    qa_chain = RetrievalQAWithSourcesChain.from_chain_type(
+    llm,
+    retriever=vectorstore.as_retriever(
+       search_type="mmr", search_kwargs={'k': 4, 'fetch_k': 10}
+        # search_type="similarity", search_kwargs={'k': 4}
+    ),
+    reduce_k_below_max_tokens=False,    
+    return_source_documents=True,
+    chain_type_kwargs={"prompt": prompt_template}
+    )
+    return qa_chain 
+
+def create_conversation_chain(llm, vectorstore, memory):
+    from langchain.chains import ConversationalRetrievalChain    
+    return ConverationalRetrievalChain.from_llm(llm=llm, retriever= vectorstore.as_retriever(), memory=memory)
+
+def create_memory():
+    from langchain.memory import ConversationBufferMemory
+    return ConversationBufferMemory(memory_key="chat_history", return_messages=True)
+    
+def format_qa_response(chain_output):
+    print(chain_output)
+    answer = chain_output.get("answer")
+    citations = format_citations(chain_output)            
+    return f"{answer} \n SOURCES: \n {citations}"
+
+def format_citations(chain_output):
+    sources = chain_output.get('sources')
+    if sources:
+        citations = []        
+        source_documents = chain_output.get('source_documents', [])
+        for document in source_documents:
+            source = document.metadata.get('source')
+            if source in sources:
+                lecture_title = document.metadata.get('lecture_title')
+                lecture_number = document.metadata.get('lecture_number')
+                doc_name =  os.path.basename(source)
+                document_citation = f"{lecture_number} - {lecture_title} ({doc_name})"
+                citations.append(document_citation)
+        return "\n".join(set(citations))
+    return sources
+
 def main():
     import textwrap 
     # file='/workspace/CS410_CourseProject/src/backend/data/transcripts/01_10-1-text-clustering-motivation.en.txt'
@@ -423,7 +468,7 @@ def main():
     
     # print(vector_db.similarity_search("text clustering", top_k=5))
         
-    g4f.debug.logging = False # enable logging
+    g4f.debug.logging = True # enable logging
     g4f.check_version = False # Disable automatic version checking
     print(g4f.version) # check version
     print(g4f.Provider.Ails.params)  # supported args
@@ -438,16 +483,13 @@ def main():
     # for message in RESPONSE:
     #     print(message, flush=True, end="")
 
-    llm: LLM = G4FLLM(
-        model=models.gpt_35_turbo,
-        provider=None
-    )
+    llm: LLM = get_llm()
 
     # res = llm("hello")
     # print(res)  # Hello! How can I assist you today?
     qa = create_qa_chain_with_sources(llm, vector_db)
     answer=qa({"question":"What is text clustering"})
-    print(answer)
+    print(format_qa_response(answer))
 
 if __name__ == "__main__":
     main() 

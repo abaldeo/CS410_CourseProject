@@ -1,9 +1,9 @@
+from app.api.api_v1.services.rag.core import create_qa_chain_with_sources, format_qa_response, get_llm
 from fastapi import APIRouter
 from app.api.api_v1.services.embedding.core import (
                                                     get_embedding_model, 
                                                     create_vectorstore)
 from app.api.api_v1.services.embedding.utils import Timer 
-from app.api.api_v1.services.embedding.token_count import num_tokens_from_string
 
 # from langchain.storage.upstash_redis import UpstashRedisStore
 # from upstash_redis import Redis
@@ -18,6 +18,10 @@ from pydantic import BaseModel
 from app.core.config import settings, get_settings
 from loguru import logger
 
+
+from langchain.globals import set_llm_cache
+from langchain.cache import InMemoryCache
+set_llm_cache(InMemoryCache())
 
 # load_dotenv()
 
@@ -37,7 +41,7 @@ def get_redis_instance():
     return redis_client
 
 redis_instance = get_redis_instance()
-REDIS_STORE  = RedisStore(client= redis_instance, ttl=None, namespace="embedding_service")
+REDIS_STORE  = RedisStore(client= redis_instance, ttl=None, namespace="rag_service")
 
 GPT_MODEL_NAME = settings.GPT_MODEL_NAME
 
@@ -52,12 +56,87 @@ EMBEDDER = CacheBackedEmbeddings.from_bytes_store(
 
 VECTOR_DB =  create_vectorstore(embedding_model=EMBEDDER)
 
+LLM = get_llm()
 
-@r.get("/query")
-def query(query_text: str):
-    # text_splitter = get_token_splitter(MODEL_NAME)
-    # chunks = chunk_texts(query_text, text_splitter)
-    # model = get_embedding_model()
-    # model = EMEDDING_MODEL
-    with Timer() as t:
-        pass
+ 
+ 
+ 
+def clean_query_text(text):
+    import string, re 
+    # Lowercase the text
+    text = text.lower().strip()
+ 
+   # Remove extra spaces/lines
+    text = re.sub(r'[ |\t]+', ' ', text)
+    text = re.sub(r"\n+", ' ', text)
+
+    lines = (line.strip() for line in text.splitlines())
+    text = " ".join(iter(lines))
+
+    punc_chars = string.punctuation.replace('.','')
+    # remove punctuations
+    text = ''.join(c for c in text if c not in punc_chars)    
+    return text
+
+
+@r.get("/qa")
+def qa(question: str):
+    qa_chain = create_qa_chain_with_sources(LLM, VECTOR_DB)
+    try:
+        with Timer() as t:
+            question = clean_query_text(question)            
+            return format_qa_response(qa_chain({"question": question}))
+    except Exception as e:
+        logger.error(e)
+        return e
+    
+
+from fastapi import WebSocket, WebSocketDisconnect
+from app.api.api_v1.services.rag.callback import QuestionGenCallbackHandler, StreamingLLMCallbackHandler
+from app.api.api_v1.services.rag.schemas import ChatResponse
+
+@r.websocket("/chat")
+async def websocket_endpoint(websocket: WebSocket):
+    await websocket.accept()
+    question_handler = QuestionGenCallbackHandler(websocket)
+    stream_handler = StreamingLLMCallbackHandler(websocket)
+    chat_history = []
+    qa_chain = create_qa_chain_with_sources(LLM, VECTOR_DB)
+    # Use the below line instead of the above line to enable tracing
+    # Ensure `langchain-server` is running
+    #qa_chain = get_chain(vectorstore, question_handler, stream_handler, tracing=True)
+
+    while True:
+        try:
+            # Receive and send back the client message
+            question = await websocket.receive_text()
+            resp = ChatResponse(sender="you", message=question, type="stream")
+            await websocket.send_json(resp.dict())
+
+            # Construct a response
+            start_resp = ChatResponse(sender="bot", message="", type="start")
+            await websocket.send_json(start_resp.dict())
+
+            result = await qa_chain.acall(
+                {"question": question, "chat_history": chat_history}
+            )
+            chat_history.append((question, result["answer"]))
+
+            if not result["answer"]==" I don't know.":
+                source_message = format_qa_response(result)
+                source_resp = ChatResponse(sender="bot", message=source_message, type="stream")
+                await websocket.send_json(source_resp.dict())
+            end_resp = ChatResponse(sender="bot", message="", type="end")
+            await websocket.send_json(end_resp.dict())
+        except WebSocketDisconnect:
+            logger.info("websocket disconnect")
+            break
+        except Exception as e:
+            logger.error(e)
+            resp = ChatResponse(
+                sender="bot",
+                message="Sorry, something went wrong. Try again.",
+                type="error",
+            )
+            await websocket.send_json(resp.dict())
+    
