@@ -1,4 +1,4 @@
-from app.api.api_v1.services.rag.core import create_qa_chain_with_sources, format_qa_response, get_llm
+from app.api.api_v1.services.rag.core import create_conversation_chain, create_memory, create_qa_chain_with_sources, create_redis_history, format_qa_response, get_llm
 from fastapi import APIRouter
 from app.api.api_v1.services.embedding.core import (
                                                     get_embedding_model, 
@@ -95,13 +95,20 @@ from fastapi import WebSocket, WebSocketDisconnect
 from app.api.api_v1.services.rag.callback import QuestionGenCallbackHandler, StreamingLLMCallbackHandler
 from app.api.api_v1.services.rag.schemas import ChatResponse
 
+BAD_ANSWER="Hmm, I am not sure" 
+
 @r.websocket("/chat")
 async def websocket_endpoint(websocket: WebSocket):
     await websocket.accept()
     question_handler = QuestionGenCallbackHandler(websocket)
     stream_handler = StreamingLLMCallbackHandler(websocket)
-    chat_history = []
-    qa_chain = create_qa_chain_with_sources(LLM, VECTOR_DB)
+    # chat_history = []
+    # qa_chain = create_qa_chain_with_sources(LLM, VECTOR_DB)
+
+    history = create_redis_history(session_id="test")
+    memory = create_memory(history)
+    qa_chain = create_conversation_chain(LLM, VECTOR_DB, memory, callbacks=[question_handler, stream_handler])
+        
     # Use the below line instead of the above line to enable tracing
     # Ensure `langchain-server` is running
     #qa_chain = get_chain(vectorstore, question_handler, stream_handler, tracing=True)
@@ -117,12 +124,9 @@ async def websocket_endpoint(websocket: WebSocket):
             start_resp = ChatResponse(sender="bot", message="", type="start")
             await websocket.send_json(start_resp.dict())
 
-            result = await qa_chain.acall(
-                {"question": question, "chat_history": chat_history}
-            )
-            chat_history.append((question, result["answer"]))
+            result = await qa_chain.acall( {"question": question, })
 
-            if not result["answer"]==" I don't know.":
+            if not BAD_ANSWER in result["answer"]:
                 source_message = format_qa_response(result)
                 source_resp = ChatResponse(sender="bot", message=source_message, type="stream")
                 await websocket.send_json(source_resp.dict())
