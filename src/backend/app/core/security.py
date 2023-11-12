@@ -8,7 +8,7 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/token")
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
-SECRET_KEY = config.SECRET_KEY
+SECRET_KEY = config.settings.SECRET_KEY
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
