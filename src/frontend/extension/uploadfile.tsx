@@ -8,8 +8,7 @@ export const FileUpload = ({closePopupUpload}) => {
         style={{
           display: "flex",
           flexDirection: "column",
-          backgroundColor: "#0288d1",
-          borderRadius: "5px"
+          backgroundColor: "#0288d1"
         }}>
             <form>
                 <h1 className={style.h1}>Lecture File Upload</h1>
