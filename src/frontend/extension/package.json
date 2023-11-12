@@ -37,7 +37,18 @@
     "permissions": [
       "tabs",
       "identity",
-      "identity.email"
+      "identity.email",
+      "windows"
+    ],
+    "web_accesible_resources": [
+      {
+        "matches": [
+          "<all_urls>"
+        ],
+        "resources": [
+          "tabs/chatbox.html"
+        ]
+      }
     ]
   }
 }

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { Box, TextField, Typography, Button, CircularProgress } from '@mui/material';
 import { styled } from '@mui/material/styles'
+import * as style from "./styles.module.css"
 
 
 interface Message {
@@ -66,14 +67,7 @@ interface Message {
   
   
     return (
-    <Box display="flex" flexDirection="column" alignItems="center" p={2} width="400px" height="500px" bgcolor="#36454F" borderColor="#A9A9A9">
-        <Button
-            color="primary"
-            variant="contained"
-            onClick={closePopup}
-        >
-            Close
-        </Button>
+    <Box display="flex" flexDirection="column" alignItems="center" p={2} width="200px" height="500px" bgcolor="#36454F" borderColor="#A9A9A9">
         <Box display="flex" flexDirection="column" width="100%" mb={2} maxHeight="400px" overflow="auto" flexGrow={1}>
         {messages.map((message, index) => (
             <Box

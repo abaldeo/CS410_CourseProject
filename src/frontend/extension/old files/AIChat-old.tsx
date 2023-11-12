@@ -1,10 +1,11 @@
 import cssText from "data-text:../styles.module.css"
 import { useState, useEffect } from "react"
-import { ChatBox } from "../chatbox"
+import { ChatBox } from "./chatbox"
 import type { PlasmoCSConfig, PlasmoGetInlineAnchor, PlasmoGetOverlayAnchor } from "plasmo"
 import Pic from "../chat-icon.png"
 import createCache from '@emotion/cache'
 import { CacheProvider } from '@emotion/react';
+import html from "../tabs/chatbox.html"
 
 // chrome.commands.onCommand.addListener()
 
@@ -46,7 +47,11 @@ const CustomButton = () => {
                         border: "none",
                         textAlign: "right"
                     }}
-                    onClick={() => setOpenChatbox(true)}>
+                    onClick={() => {
+                        setOpenChatbox(true)
+                        var element = document.querySelectorAll('div[aria-label="Video Player"]')[0]
+                        element.firstChild.removeEventListener
+                        }}>
                     <img 
                         style={{
                             cursor: "pointer",

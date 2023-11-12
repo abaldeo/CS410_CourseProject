@@ -11,7 +11,6 @@ export const FileUpload = ({closePopupUpload}) => {
           backgroundColor: "#0288d1",
           borderRadius: "5px"
         }}>
-            <button className={style.button} onClick={closePopupUpload}>Close</button>
             <form>
                 <h1 className={style.h1}>Lecture File Upload</h1>
                 <input type="file" multiple={true} className={style.input}/>

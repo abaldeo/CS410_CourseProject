@@ -1,6 +1,9 @@
 import { useState, useEffect } from "react"
 import * as style from "./styles.module.css"
 import { FileUpload } from "./uploadfile"
+import React from 'react'
+import {ChatBox} from "./chatbox"
+import ReactDOM from 'react-dom'
 import Pic from "./settings-icon.png"
 
 function IndexPopup() {
@@ -40,10 +43,16 @@ function IndexPopup() {
         </h1>
         <button
           className={style.button}
-          onClick={() => setOpenUpload(true)}
+          onClick={() => openUpload ? setOpenUpload(false) : setOpenUpload(true)}
           value="Upload File">Upload File
         </button>
         {openUpload ? <FileUpload closePopupUpload={() => setOpenUpload(false)}/> : null}
+        <button
+          className={style.button}
+          onClick={() => openChatbox ? setOpenChatbox(false) : setOpenChatbox(true)}
+          value="Chat Box">Ask a Question
+        </button>
+        {openChatbox ? <ChatBox closePopup={() => setOpenChatbox(false)}/> : null}
       </div>
     )
   }
