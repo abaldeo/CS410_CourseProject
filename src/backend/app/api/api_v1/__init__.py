@@ -13,7 +13,7 @@ v1_router = APIRouter()
 # v1_router.include_router(core_router, prefix="/v1")
 # v1_router.include_router(auth_router, tags=["auth"])
 
-v1_router.include_router(auth_router, prefix="/api", tags=["auth"])
+v1_router.include_router(auth_router, tags=["auth"])
 
 v1_router.include_router(
     users_router,
