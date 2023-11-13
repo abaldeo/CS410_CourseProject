@@ -67,7 +67,7 @@ interface Message {
   
   
     return (
-    <Box display="flex" flexDirection="column" alignItems="center" p={2} width="200px" height="500px" bgcolor="#36454F" borderColor="#A9A9A9">
+    <Box display="flex" flexDirection="column" alignItems="center" p={2} width="218px" height="500px" bgcolor="#FDFCFA" borderColor="#A9A9A9">
         <Box display="flex" flexDirection="column" width="100%" mb={2} maxHeight="400px" overflow="auto" flexGrow={1}>
         {messages.map((message, index) => (
             <Box
