@@ -6,6 +6,8 @@ RUN pip install pipx
 
 RUN pipx install pdm  
 
+RUN pipx ensurepath
+
 COPY ./pyproject.toml ./pdm.lock* /tmp/
 
 RUN pdm export -f requirements --output requirements.txt --without-hashes
