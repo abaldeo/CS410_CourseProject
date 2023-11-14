@@ -39,7 +39,8 @@
       "tabs",
       "identity",
       "identity.email",
-      "windows"
+      "windows",
+      "scripting"
     ],
     "web_accesible_resources": [
       {

@@ -3,7 +3,7 @@ import * as style from "./styles.module.css"
 import { FileUpload } from "./uploadfile"
 import { SettingsMenu } from "./settingsMenu"
 import React from 'react'
-import {ChatBox} from "./chatbox"
+// import {ChatBox} from "./tabs/chatbox"
 import ReactDOM from 'react-dom'
 import Pic from "./settings-icon.png"
 import { Box, TextField, Typography, Button, Container, Grid } from '@mui/material';
@@ -124,10 +124,17 @@ function IndexPopup() {
         {openUpload ? <FileUpload closePopupUpload={() => setOpenUpload(false)}/> : null}
         <button
           className={style.button}
-          onClick={() => openChatbox ? setOpenChatbox(false) : setOpenChatbox(true)}
+          onClick={() => {
+            chrome.windows.create({
+              url: "./tabs/chatbox.html",
+              type: "popup",
+              height: 500,
+              width: 500
+            })
+          }}
           value="Chat Box">Ask a Question
         </button>
-        {openChatbox ? <ChatBox closePopup={() => setOpenChatbox(false)}/> : null}
+        {/* {openChatbox ? <ChatBox closePopup={() => setOpenChatbox(false)}/> : null} */}
       </div>
     )
   }
