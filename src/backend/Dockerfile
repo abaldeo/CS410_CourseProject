@@ -6,7 +6,7 @@ RUN pip install pipx
 
 RUN pipx install pdm  
 
-RUN pipx ensurepath
+ENV PATH="/root/.local/bin:${PATH}"
 
 COPY ./pyproject.toml ./pdm.lock* /tmp/
 
