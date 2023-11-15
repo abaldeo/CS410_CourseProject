@@ -1,15 +1,19 @@
 import { useState, useEffect } from "react"
 import * as style from "./styles.module.css"
 import { FileUpload } from "./uploadfile"
-import { SettingsMenu } from "./settingsMenu"
 import React from 'react'
 // import {ChatBox} from "./tabs/chatbox"
 import ReactDOM from 'react-dom'
 import Pic from "./settings-icon.png"
-import { Box, TextField, Typography, Button, Container, Grid } from '@mui/material'
+import { Box, TextField, Typography, Button, Container, Grid, MenuItem, Menu} from '@mui/material'
+import SettingsIcon from '@mui/icons-material/Settings'
+import LogoutIcon from '@mui/icons-material/Logout'
 import { login, isAuthenticated } from "../src/utils/auth"
+import {logout} from "../src/utils/auth"
 
 // const [isLoggedIn, setIsLoggedIn] = useState(false)
+
+
 
 function Login() {
   // const [isLoggedIn, setIsLoggedIn] = useState(false)
@@ -141,10 +145,17 @@ function IndexPopup() {
   if (currentUrl.includes("coursera.org/learn")) {
     return (
       <div className={style.div}>
-        <button className={style.settingsButton} value="settings" onClick={() => openSettings ? setOpenSettings(false) : setOpenSettings(true)}>
-            <img className={style.settingsIcon} src={Pic} alt=""></img>
-        </button>
-        {openSettings ? <SettingsMenu closeSettings={() => setOpenSettings(false)}/> : null}
+        <Box sx={{display: "flex", justifyContent: "space-between"}}>
+          <Button onClick={() => {
+            logout()
+            window.close()
+          }}>
+            <LogoutIcon/>
+          </Button>
+          <Button>
+            <SettingsIcon/>
+          </Button>
+        </Box>
         <h1 className={style.h1}>
           Welcome to CourseBuddy, {currentUsername}!
         </h1>
@@ -166,7 +177,6 @@ function IndexPopup() {
           }}
           value="Chat Box">Ask a Question
         </button>
-        {/* {openChatbox ? <ChatBox closePopup={() => setOpenChatbox(false)}/> : null} */}
       </div>
     )
   }
