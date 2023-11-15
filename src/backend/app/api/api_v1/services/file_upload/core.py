@@ -163,38 +163,6 @@ async def retrieve_slide(course_name, slide_file_name, settings):
         return None 
 
 
-#Uploads all text files in a directory 
-def bulk_upload_transcripts():
-    import requests
-    directory = "/workspaces/CS410_CourseProject/src/backend/data/transcripts"
-    endpoint_url = "https://localhost:8000/api/docs#/file_upload/uploadTranscriptTester_api_v1_file_upload_uploadTranscriptTest_post"
-
-    for filename in os.listdir(directory):
-        f = os.path.join(directory, filename)
-        # Check if it is a file and ends with '.txt'
-        if os.path.isfile(f) and filename.endswith('.txt'):
-            with open(f, 'r') as text_file:
-                text = text_file.read()
-
-            # Set up the data to be sent in the POST request
-            data = {
-                "course_name": "CS410",  # Replace with your course name
-                "transcript_name": filename,
-                "transcript_text": text
-            }
-
-            # Send the POST request to the FastAPI endpoint
-            response = requests.post(endpoint_url, data=data)
-
-            # Check the response
-            if response.status_code == 200:
-                logger.info(f"Transcript {filename} uploaded successfully.")
-            else:
-                logger.error(f"Failed to upload transcript {filename}. Status code: {response.status_code}")
-
-
-
-
 def test_upload_slides():
     from fastapi.testclient import TestClient
     from app.api.api_v1.services.file_upload.main import app    

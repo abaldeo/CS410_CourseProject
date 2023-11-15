@@ -2,7 +2,7 @@ import pathlib
 from fastapi import APIRouter, UploadFile, File, HTTPException, status
 from fastapi.responses import Response, FileResponse, StreamingResponse
 from app.core.config import get_settings
-from core import upload_transcript, retrieve_transcript, upload_slide, retrieve_slide
+from .core import upload_transcript, retrieve_transcript, upload_slide, retrieve_slide
 from pydantic import BaseModel, HttpUrl
 from loguru import logger
 router = r = APIRouter()
@@ -77,10 +77,10 @@ async def upload_lecture_slide(courseName: str, slideFile: UploadFile,  videoNam
     try:
         # content_type = slideFile.content_type            
         file_type = pathlib.Path(slideFile.filename).suffix
-        if file_type not in SUPPORTED_FILE_TYPES:
+        if file_type not in CONTENT_TYPE_MAP.keys():
             raise HTTPException(
                             status_code=status.HTTP_400_BAD_REQUEST,
-                            detail=f'Unsupported file type: {slideFile.filename}. Supported types are {SUPPORTED_FILE_TYPES}'
+                            detail=f'Unsupported file type: {slideFile.filename}. Supported types are {CONTENT_TYPE_MAP.keys()}'
                         )
         file_url = await upload_slide(courseName, slideFile, settings)
         message =  f'{slideFile.filename} uploaded successfully'
@@ -106,10 +106,10 @@ async def upload_lecture_slides(courseName: str, slideFiles: list[UploadFile], u
         try:
             # content_type = slideFile.content_type            
             file_type = pathlib.Path(slideFile.filename).suffix
-            if file_type not in SUPPORTED_FILE_TYPES:
+            if file_type not in CONTENT_TYPE_MAP.keys():
                 raise HTTPException(
                                 status_code=status.HTTP_400_BAD_REQUEST,
-                                detail=f'Unsupported file type: {slideFile.filename}. Supported types are {SUPPORTED_FILE_TYPES}'
+                                detail=f'Unsupported file type: {slideFile.filename}. Supported types are {CONTENT_TYPE_MAP.keys()}'
                             )
             file_url = await upload_slide(courseName, slideFile, settings)
             message =  f'{slideFile.filename} uploaded successfully'
