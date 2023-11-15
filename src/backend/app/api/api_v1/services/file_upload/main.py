@@ -6,15 +6,12 @@ from app.core import config
 from service import router
 
 
-router = APIRouter()
-
-
 #file_upload_router = APIRouter(prefix="/file_upload", tags=["file_upload"])
 #file_upload_router.include_router(router)
 
 
 app = FastAPI(
-    title=config.PROJECT_NAME, docs_url="/api/docs", openapi_url="/api", default_response_class=ORJSONResponse
+    title=config.settings.PROJECT_NAME, docs_url="/api/docs", openapi_url="/api", default_response_class=ORJSONResponse
 )
 
 app.include_router(router)
