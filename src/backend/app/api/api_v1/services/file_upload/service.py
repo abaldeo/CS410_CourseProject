@@ -2,7 +2,7 @@ import pathlib
 from fastapi import APIRouter, UploadFile, File, HTTPException, status
 from fastapi.responses import Response, FileResponse, StreamingResponse
 from app.core.config import get_settings
-from core import upload_transcript, retrieve_transcript, upload_slide, retrieve_slide, bulk_upload_transcripts
+from core import upload_transcript, retrieve_transcript, upload_slide, retrieve_slide
 from pydantic import BaseModel, HttpUrl
 from loguru import logger
 router = r = APIRouter()
@@ -148,7 +148,64 @@ async def get_lecture_slide(courseName: str, slideFileName: str, userName: str =
             raise e
         raise HTTPException(status_code=500, detail=str(e))
 
+@router.get("/listSlides")
+def list_lecture_slides(courseName: str='', userName: str = '', detail: bool = False):
+    settings = get_settings()
+    try:
+        return list_s3_bucket_contents(courseName, 'slides', detail, settings)
+    except Exception as e:
+        logger.error(e)
 
-@router.post("/bulkUploadTranscripts")
-async def bulk_upload_transcripts():
-    return bulk_upload_transcripts()
+
+@router.get("/listTranscripts")
+def list_lecture_slides(courseName: str='', userName: str = '', detail: bool = False):
+    settings = get_settings()
+    try:
+        return list_s3_bucket_contents(courseName, 'transcripts', detail, settings)
+    except Exception as e:
+        logger.error(e)
+
+@router.delete("/removeCourseFile")
+def remove_course_file(fileName: str, courseName: str = '', userName: str = ''):
+    settings = get_settings()
+    try:
+        import s3fs
+        s3 = s3fs.S3FileSystem(anon=False,
+                            key=settings.AWS_ACCESS_KEY_ID,
+                            secret=settings.AWS_SECRET_ACCESS_KEY,
+                            endpoint_url=settings.S3_ENDPOINT_URL,
+                            ) 
+        if s3.exists(fileName) and s3.isfile(fileName):
+            logger.warning(f"Removing {fileName}")            
+            s3.rm_file(fileName)
+            return f"{fileName} removed successfully!"        
+        elif courseName:
+            subfolder  = 'transcripts' if pathlib.Path(fileName).suffix in '.txt' else 'slides'
+            filePath = f"{settings.S3_BUCKET_NAME}/{courseName}/{subfolder}/{fileName}"
+            if s3.exists(filePath) and s3.isfile(filePath):
+                logger.warning(f"Removing {filePath}")
+                s3.rm_file(filePath)
+                return f"{courseName} file {fileName} removed successfully!"
+        else:
+            return f"{fileName} not found!"
+    except Exception as e:
+        logger.error(e)
+        raise HTTPException(status_code=500, detail=str(e))
+
+def list_s3_bucket_contents(courseName, courseFolder, detail, settings):
+    import s3fs
+    s3 = s3fs.S3FileSystem(anon=False,
+                        key=settings.AWS_ACCESS_KEY_ID,
+                        secret=settings.AWS_SECRET_ACCESS_KEY,
+                        endpoint_url=settings.S3_ENDPOINT_URL,
+                        )
+    bucket_name = settings.S3_BUCKET_NAME
+    if not courseName: 
+        dirs= s3.glob(f"{bucket_name}/*/{courseFolder}/")
+        results = []
+        for dir in dirs:
+            course = dir.split('/')[-2]
+            results.extend(s3.ls(f"{bucket_name}/{course}/{courseFolder}/", detail))
+        return results
+    else:
+        return  s3.ls(f"{bucket_name}/{courseName}/{courseFolder}/", detail)

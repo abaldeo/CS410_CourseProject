@@ -1,12 +1,9 @@
 import botocore
 import os
 import aioboto3
-from fastapi.responses import StreamingResponse
 from loguru import logger
 from app.core.config import get_settings
-  
 import tempfile  
-import shutil
 
 class S3Utils:
     @staticmethod
@@ -194,3 +191,45 @@ def bulk_upload_transcripts():
                 logger.info(f"Transcript {filename} uploaded successfully.")
             else:
                 logger.error(f"Failed to upload transcript {filename}. Status code: {response.status_code}")
+
+
+
+
+def test_upload_slides():
+    from fastapi.testclient import TestClient
+    from app.api.api_v1.services.file_upload.main import app    
+    client = TestClient(app)
+    directory = "/workspaces/CS410_CourseProject/src/backend/data/slides"        
+    
+    for filename in os.listdir(directory):
+        f = os.path.join(directory, filename)
+        # Check if it is a file and ends with '.txt'
+        if os.path.isfile(f) and filename.endswith('.pdf'):
+            file =  open(f, 'rb')
+            resp = client.post("/uploadSlide?courseName=cs410", 
+                            files={"slideFile": (filename,file , "application/pdf")},
+                            )
+            file.close()
+            print(resp.content)
+
+def test_upload_transcripts():
+    from fastapi.testclient import TestClient
+    from app.api.api_v1.services.file_upload.main import app    
+    client = TestClient(app)
+    directory = "/workspaces/CS410_CourseProject/src/backend/data/transcripts"        
+    
+    for filename in os.listdir(directory):
+        f = os.path.join(directory, filename)
+        # Check if it is a file and ends with '.txt'
+        if os.path.isfile(f) and filename.endswith('.txt'):
+            with open(f, 'rb') as file:
+                videoName = filename.replace(".txt", "")    
+                resp = client.post("/uploadTranscript", 
+                                json={"courseName": "cs410", "videoName": videoName, 
+                                      "transcriptText": file.read().decode("utf-8")},)
+                print(resp.content)
+
+      
+if __name__ == '__main__':
+    test_upload_transcripts()
+#    test_upload_slides()
