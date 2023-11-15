@@ -16,7 +16,7 @@
     "@mui/material": "^5.14.16",
     "@mui/styled-engine-sc": "^6.0.0-alpha.4",
     "@react-navigation/native-stack": "^6.9.17",
-    "plasmo": "^0.83.1",
+    "plasmo": "^0.84.0",
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "react-router-dom": "^6.17.0",
@@ -48,7 +48,8 @@
           "<all_urls>"
         ],
         "resources": [
-          "tabs/chatbox.html"
+          "tabs/chatbox.html",
+          "tabs/signup.html"
         ]
       }
     ]

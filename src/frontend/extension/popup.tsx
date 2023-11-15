@@ -6,22 +6,42 @@ import React from 'react'
 // import {ChatBox} from "./tabs/chatbox"
 import ReactDOM from 'react-dom'
 import Pic from "./settings-icon.png"
-import { Box, TextField, Typography, Button, Container, Grid } from '@mui/material';
+import { Box, TextField, Typography, Button, Container, Grid } from '@mui/material'
+import { login, isAuthenticated } from "../src/utils/auth"
 
 // const [isLoggedIn, setIsLoggedIn] = useState(false)
 
 function Login() {
-  const [isLoggedIn, setIsLoggedIn] = useState(false)
+  // const [isLoggedIn, setIsLoggedIn] = useState(false)
+  const [email, setEmail] = useState('')
+  const [pwd, setPwd] = useState('')
 
-  const handleSubmit = event => {
-    setIsLoggedIn((isLoggedIn) => !isLoggedIn)
-  }
-
-  if (isLoggedIn) {
+  if (isAuthenticated()) {
     return(
       <IndexPopup/>
     )
   }
+
+  function handleSuccess() {
+    console.log(isAuthenticated())
+    window.close()
+  }
+  function handleFailure() {
+    console.log(isAuthenticated())
+    alert("Login Failed")
+  }
+
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+    login(email, pwd).then(handleSuccess, handleFailure)
+    // console.log(isAuthenticated())
+  }
+
+  // if (isLoggedIn) {
+  //   return(
+  //     <IndexPopup/>
+  //   )
+  // }
   return (
     <Container component="main">
       <Box
@@ -46,6 +66,8 @@ function Login() {
             name="email"
             autoComplete="email"
             autoFocus
+            onChange={(e) => setEmail(e.target.value)}
+            value = {email}
           />
           <TextField
             margin="normal"
@@ -56,6 +78,8 @@ function Login() {
             type="password"
             id="password"
             autoComplete="current-password"
+            onChange={(e) => setPwd(e.target.value)}
+            value = {pwd}
           />
           <Button
             type="submit"
@@ -69,6 +93,14 @@ function Login() {
             fullWidth
             variant="contained"
             sx={{ mt: 0, mb: 2, borderRadius: 0 }}
+            onClick={() => {
+              chrome.windows.create({
+                url: "./tabs/signup.html",
+                type: "popup",
+                height: 500,
+                width: 500
+              })
+            }}
           >
             Sign Up
           </Button>
