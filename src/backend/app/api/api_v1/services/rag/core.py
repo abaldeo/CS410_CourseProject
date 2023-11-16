@@ -11,9 +11,7 @@ from app.core.config import settings, get_settings
 from loguru import logger
 
 
-def get_bm25_retriever(documents_path="/workspaces/CS410_CourseProject/src/backend/data/transcripts/"):
-    #TODO - take documents path as arg
-    #TODO - bullk load from s3 
+def get_bm25_retriever(documents_path="s3://coursebuddy/cs410/transcripts/"):
     from langchain.retrievers import BM25Retriever
     documents = bulk_load_n_split_docs(directory_path=documents_path)
     

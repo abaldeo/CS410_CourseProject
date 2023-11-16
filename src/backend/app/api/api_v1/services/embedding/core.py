@@ -90,7 +90,44 @@ def load_document(file):
     data = loader.load()
     return data
 
+
+def split_s3_url(s3_url):
+    from urllib.parse import urlparse
+    parsed_url = urlparse(s3_url, allow_fragments=False)
+    bucket_name = parsed_url.netloc
+    s3_path = parsed_url.path.lstrip('/')
+    return bucket_name, s3_path
+
+def load_s3_file(file_name, bucket_name=settings.S3_BUCKET_NAME):
+    from langchain.document_loaders import S3FileLoader
+    if file_name.startswith('s3://') or not bucket_name:
+        bucket_name,file_name = split_s3_url(file_name)
+    # print(bucket_name, file_name)
+    loader = S3FileLoader(bucket_name, file_name, 
+                          region_name=AWS_REGION_NAME, endpoint_url=S3_ENDPOINT_URL,
+                          aws_access_key_id=AWS_ACCESS_KEY_ID, aws_secret_access_key=AWS_SECRET_ACCESS_KEY)
+    return loader.load()
+
+def create_s3_directory_loader(directory_path, bucket_name=settings.S3_BUCKET_NAME):
+    from langchain.document_loaders import S3DirectoryLoader
+    settings = get_settings()
+    if directory_path.startswith('s3://'):
+        bucket_name,file_path = split_s3_url(directory_path)
+        directory_path  = os.path.dirname(file_path)
+    # print(directory_path, bucket_name)
+    return S3DirectoryLoader(
+        prefix=directory_path,
+        bucket=bucket_name,
+        region_name=settings.AWS_REGION_NAME,
+        endpoint_url=settings.S3_ENDPOINT_URL,
+        aws_access_key_id=settings.AWS_ACCESS_KEY_ID,  
+        aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY
+    )
+    
+
 def create_directory_loader(file_type, directory_path):
+    if directory_path.startswith('s3://'):
+        return create_s3_directory_loader(directory_path)
     loader_class, loader_kwargs = LOADER_MAPPING[file_type]    
     return DirectoryLoader(
         path=directory_path,
@@ -102,16 +139,10 @@ def create_directory_loader(file_type, directory_path):
     )
 
 def get_loaders(dir):
-  extensions=LOADER_MAPPING.keys()
+  if dir.startswith('s3://'):
+     return [create_s3_directory_loader(dir)]
+  extensions=LOADER_MAPPING.keys()  
   return [create_directory_loader(extension,dir) for extension in extensions]
-
-
-def load_s3_file(file_name, bucket_name):
-    from langchain.document_loaders import S3FileLoader
-    loader = S3FileLoader(bucket_name, file_name, 
-                          region_name=AWS_REGION_NAME, endpoint_url=S3_ENDPOINT_URL,
-                          aws_access_key_id=AWS_ACCESS_KEY_ID, aws_secret_access_key=AWS_SECRET_ACCESS_KEY)
-    return loader.load()
 
 
 def clean_text(text):
@@ -248,8 +279,11 @@ def bulk_load_n_split_docs(directory_path="/workspace/CS410_CourseProject/src/ba
                      split_seperators=None):
     if not gpt_model: gpt_model = 'gpt-3.5-turbo'
     if not split_seperators: split_seperators = ['.','\n','\n\n']
-    loader = create_directory_loader(file_ext, directory_path)
-    documents = loader.load()
+    if not file_ext:
+        documents = load_all_docs(directory_path)
+    else:
+        loader = create_directory_loader(file_ext, directory_path)
+        documents = loader.load()
     text_splitter = get_text_splitter2(gpt_model,separators=split_seperators)
     chunks = chunk_docs(documents, text_splitter)
     return chunks 
@@ -335,7 +369,7 @@ def enrich_document_metadata(documents):
                 doc.metadata['lecture_title'] = lecture_title
 
 
-def main():
+def main2():
     # import textwrap 
     # file='/workspace/CS410_CourseProject/src/backend/data/transcripts/01_10-1-text-clustering-motivation.en.txt'
     # doc = load_document(file)
@@ -397,6 +431,15 @@ def main():
     # qa = create_qa_chain_with_sources(llm, vector_db)
     # answer=qa({"question":"What is text clustering"})
     # print(format_qa_response(answer))
+
+def main():
+    # file='s3://coursebuddy/cs410/slides/01_7-1-overview-text-mining-and-analytics-part-1_TM-3-overview.pdf'
+    # file='cs410/transcripts/01_7-1-overview-text-mining-and-analytics-part-1.en.txt'
+    # print(load_s3_file(file))
+    # loader = create_directory_loader('','s3://coursebuddy/cs410/transcripts/')
+    # loader = create_directory_loader('.pdf', '/workspaces/CS410_CourseProject/src/backend/data/slides/')
+    docs = bulk_load_n_split_docs('s3://coursebuddy/cs410/')
+    print(len(docs))
 
 if __name__ == "__main__":
     main() 
