@@ -21,7 +21,7 @@ class SummaryRequestModel(BaseModel):
     userId: int
     courseName: str
     videoName: str
-    S3Path: str
+    transcript: str
 
 
 async def upload_summary_to_s3(course_name: str, transcript_name: str, summary_text: str):
@@ -70,6 +70,21 @@ def get_transcript_from_s3(s3_path: str) -> List[Document]:
                           aws_access_key_id=settings.AWS_ACCESS_KEY_ID, aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY)
     try:
         return loader.load()
+    except ClientError:
+        # Handles if the s3 path DNE
+        return None
+
+def get_summary_from_s3(course_name: str, video_name: str) -> dict | None:
+    loader = S3FileLoader(bucket="coursebuddy", key=f"{course_name}/summaries/{video_name}", 
+                          region_name=settings.AWS_REGION_NAME, endpoint_url=settings.S3_ENDPOINT_URL,
+                          aws_access_key_id=settings.AWS_ACCESS_KEY_ID, aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY)
+    try:
+        doc: Document = loader.load()[0]
+        return {
+            "courseName": course_name, 
+            "videoName": video_name, 
+            "summary": doc.page_content
+            }
     except ClientError:
         # Handles if the s3 path DNE
         return None
@@ -180,3 +195,42 @@ def generate_summary(txt_to_summarize: Document, gpt_model_name: str) -> str:
     summary = map_reduce_chain.run(**{'input_documents': chunks, 'num_bullet_points': num_of_bullet_points})
     return summary
 
+
+if __name__ == "__main__":
+    print(get_summary_from_s3(course_name="cs410", video_name="06_9-6-probabilistic-topic-models-expectation-maximization-algorithm-part-3.en.txt"))
+    # import os
+    # # from app.api.api_v1.services.embedding.core import load_s3_file
+    # import boto3
+    # import botocore
+    # from dotenv import load_dotenv
+    # load_dotenv()
+
+    # REGION_NAME = os.getenv("REGION_NAME")
+    # ENDPOINT_URL = os.getenv("ENDPOINT_URL")
+    # AWS_SECRET_ACCESS_KEY = os.getenv("AWS_SECRET_ACCESS_KEY")
+    # AWS_ACCESS_KEY_ID = os.getenv("AWS_ACCESS_KEY_ID")
+
+    # print(REGION_NAME)
+    # print(ENDPOINT_URL)
+    # print(AWS_SECRET_ACCESS_KEY)
+    # print(AWS_ACCESS_KEY_ID)
+
+
+    # session = boto3.session.Session()
+    # client = session.client('s3',
+    #                         config=botocore.config.Config(s3={'addressing_style': 'virtual'}), # Configures to use subdomain/virtual calling format.
+    #                         region_name=REGION_NAME,
+    #                         endpoint_url=ENDPOINT_URL,
+    #                         aws_access_key_id=AWS_ACCESS_KEY_ID,
+    #                         aws_secret_access_key=AWS_SECRET_ACCESS_KEY)
+
+    # #lists all buckets in account
+    # response = client.list_buckets()
+    # for space in response['Buckets']:
+    #     print(space['Name'])
+    #     bucket_name = space['Name']
+
+    # #prints all files in coursebuddy bucket
+    # response = client.list_objects(Bucket=bucket_name)
+    # for obj in response['Contents']:
+    #     print(obj['Key'])
