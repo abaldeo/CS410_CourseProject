@@ -13,7 +13,7 @@ CourseBuddy is a Chrome extension designed to enhance the Coursera Online Learni
 - Avinash Badeo (@abaldeo2)
 - Zach Pohl (@zcpohl2)
 - Colton Bailey (@coltonb4)
-- Ehsan Sarfaraz (@ehsans3)
+- ~~Ehsan Sarfaraz (@ehsans3)~~ 
 - Kacper Dural (@kdural2)
 
 
