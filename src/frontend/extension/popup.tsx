@@ -4,7 +4,6 @@ import { FileUpload } from "./uploadfile"
 import React from 'react'
 // import {ChatBox} from "./tabs/chatbox"
 import ReactDOM from 'react-dom'
-import Pic from "./settings-icon.png"
 import { Box, TextField, Typography, Button, Container, Grid, MenuItem, Menu} from '@mui/material'
 import SettingsIcon from '@mui/icons-material/Settings'
 import LogoutIcon from '@mui/icons-material/Logout'
@@ -50,15 +49,14 @@ function Login() {
     <Container component="main">
       <Box
         sx={{  
-          marginTop: 8,
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
-          width: "300px"
+          width: "300px" 
         }}
       >
         <Typography component="h1" variant="h5">
-          Sign in
+          CourseBuddy
         </Typography>
         <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 1 }}>
           <TextField
@@ -89,14 +87,14 @@ function Login() {
             type="submit"
             fullWidth
             variant="contained"
-            sx={{ mt: 3, mb: 0, borderRadius: 0 }}
+            sx={{ mt: 3, mb: 0, borderRadius: 0, borderBottom: 1 }}
           >
             Sign In
           </Button>
           <Button
             fullWidth
             variant="contained"
-            sx={{ mt: 0, mb: 2, borderRadius: 0 }}
+            sx={{ mt: 0, mb: 2, borderRadius: 0, borderTop: 1 }}
             onClick={() => {
               chrome.windows.create({
                 url: "./tabs/signup.html",
