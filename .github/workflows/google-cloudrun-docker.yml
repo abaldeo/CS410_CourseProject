@@ -95,7 +95,7 @@ jobs:
         run: |-
           gcloud init
           gcloud auth configure-docker us-central1-docker.pkg.dev
-          gcloud auth print-access-token | docker login -u oauth2accesstoken --password-stdin https://us-west3-docker.pkg.dev
+          gcloud auth print-access-token | docker login -u oauth2accesstoken --password-stdin https://us-central1-docker.pkg.dev
 
       - name: Build and Push Container
         run: |-
