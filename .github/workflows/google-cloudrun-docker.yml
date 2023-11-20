@@ -97,7 +97,7 @@ jobs:
 
       - name: Build and Push Container
         run: |-
-          ddocker buildx build --platform linux/amd64 -t "${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/cs410/${{ env.SERVICE }}:${{ github.sha }}" ./src/backend
+          docker buildx build --platform linux/amd64 -t "${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/cs410/${{ env.SERVICE }}:${{ github.sha }}" ./src/backend
           docker push "${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/cs410/${{ env.SERVICE }}:${{ github.sha }}"
 
       # END - Docker auth and build
