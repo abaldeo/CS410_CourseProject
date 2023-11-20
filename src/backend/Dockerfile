@@ -28,11 +28,11 @@ ENV PYTHONUNBUFFERED 1
 RUN apt update && \
     apt install -y postgresql-client
 
-COPY --from=requirements-stage /tmp/requirements.txt /app/requirements.txt
+COPY --from=requirements-stage /tmp/requirements.txt ./requirements.txt
 
 RUN pip install --upgrade pip
-RUN pip install --no-cache-dir -r /app/requirements.txt
+RUN pip install --no-cache-dir -r ./requirements.txt
 
-COPY ./app /app
+COPY . .
 
 CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
