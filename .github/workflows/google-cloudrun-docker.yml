@@ -44,8 +44,9 @@
 
 name: Build and Deploy to Cloud Run
 
-on: [push]
-  branches: [ "main" ]
+on:
+  push:
+    branches: [ "main" ]
 
 env:
   PROJECT_ID: '${{ vars.PROJECT_ID }}' # TODO: update Google Cloud project id
@@ -93,11 +94,11 @@ jobs:
 
       - name: Docker auth added
         run: |-
-          gcloud auth print-access-token | docker login -u oauth2accesstoken --password-stdin https://us-central1-docker.pkg.dev
+          gcloud auth print-access-token | docker login -u oauth2accesstoken --password-stdin "https://${{env.GAR_LOCATION}}-docker.pkg.dev"
 
       - name: Build and Push Container
         run: |-
-          docker buildx build --platform linux/amd64 -t "${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/cs410/${{ env.SERVICE }}:${{ github.sha }}" ./src/backend
+          docker buildx build --platform linux/amd64 -t "${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.SERVICE }}/${{ env.SERVICE }}:${{ github.sha }}" ./src/backend
           docker push "${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.SERVICE }}/${{ env.SERVICE }}:${{ github.sha }}"
 
       # END - Docker auth and build
