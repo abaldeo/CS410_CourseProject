@@ -1,4 +1,5 @@
 
+
 FROM python:3.11 as requirements-stage
 WORKDIR /tmp
 
@@ -12,8 +13,8 @@ COPY ./pyproject.toml ./pdm.lock* /tmp/
 
 RUN pdm export -f requirements --output requirements.txt --without-hashes
 
-#COPY pyproject.toml pdm.lock ./
-#RUN pip install pdm && \
+# COPY pyproject.toml pdm.lock ./
+# RUN pip install pdm && \
 #    pdm install --no-ansi --no-interaction
 
 
@@ -39,4 +40,5 @@ EXPOSE 8080
 
 ENV PYTHONPATH=/app
 
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8080", "--app-dir", "./app/"]
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000", "--app-dir", "./app/"]
+
