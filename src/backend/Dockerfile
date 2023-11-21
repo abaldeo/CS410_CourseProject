@@ -1,4 +1,5 @@
 
+
 FROM python:3.11 as requirements-stage
 WORKDIR /tmp
 
@@ -19,7 +20,7 @@ RUN pdm export -f requirements --output requirements.txt --without-hashes
 
 FROM python:3.11
 
-RUN mkdir /app
+RUN mkdir -p /app
 WORKDIR /app
 
 ENV PYTHONDONTWRITEBYTECODE 1
@@ -30,8 +31,13 @@ RUN apt update && \
 
 COPY --from=requirements-stage /tmp/requirements.txt ./requirements.txt
 
-RUN pip install --no-cache-dir --upgrade -r requirements.txt
+RUN pip install --upgrade pip
+RUN pip install --no-cache-dir -r ./requirements.txt
 
 COPY . .
 
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8080"]
+EXPOSE 8080
+
+ENV PYTHONPATH=/app
+
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000", "--app-dir", "./app/"]
