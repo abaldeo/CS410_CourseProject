@@ -45,7 +45,7 @@
 name: Build and Deploy to Cloud Run
 
 on: [push]
-    #branches: [ "main" ]
+  branches: [ "main" ]
 
 env:
   PROJECT_ID: '${{ vars.PROJECT_ID }}' # TODO: update Google Cloud project id
