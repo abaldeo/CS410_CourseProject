@@ -81,7 +81,14 @@ class S3Utils:
                 f.write(chunk)
 
         return temp_path
-                        
+
+    @staticmethod
+    def make_s3_url(s3_path, s3_endpoint_url):
+        return f"{s3_endpoint_url}/{s3_path}"
+
+    @staticmethod
+    def make_s3_path(s3_path):
+        return f"s3://{s3_path}"
                 
 async def upload_transcript(course_name, transcript_name, transcript_text, settings):
     aws_region_name= settings.AWS_REGION_NAME
@@ -100,8 +107,9 @@ async def upload_transcript(course_name, transcript_name, transcript_text, setti
     # client = S3Utils.get_client(aws_region_name, s3_endpoint_url, aws_access_key_id, aws_secret_access_key)        
     logger.info(f"Uploading {object_key} to bucket {s3_bucket}")
     result = await S3Utils.upload_to_s3(s3_bucket, object_key, transcript_text, metadata=metadata)
-    return result 
-
+    logger.debug(result)
+    file_url = f"{s3_endpoint_url}/{s3_bucket}/{object_key}"
+    return file_url 
 
 async def retrieve_transcript(course_name, transcript_name, settings):
     aws_region_name= settings.AWS_REGION_NAME
@@ -132,13 +140,14 @@ async def upload_slide(course_name, slide_file, settings):
         'x-amz-meta-lecture-title': slide_file.filename,
         'x-amz-meta-lecture-url': '',
         'x-amz-meta-content-type': slide_file.content_type,
-        'x-amz-meta-size': str(slide_file.size)
+        # 'x-amz-meta-size': str(slide_file.size)
         
     }
     # client = S3Utils.get_client(aws_region_name, s3_endpoint_url, aws_access_key_id, aws_secret_access_key)            
     contents = await slide_file.read()
     logger.info(f"Uploading {object_key} to bucket {s3_bucket}")
     result = await S3Utils.upload_to_s3(s3_bucket, object_key, contents, metadata=metadata)
+    logger.debug(result)
     file_url = f"{s3_endpoint_url}/{s3_bucket}/{object_key}"
     return file_url 
 
