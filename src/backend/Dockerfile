@@ -13,8 +13,8 @@ COPY ./pyproject.toml ./pdm.lock* /tmp/
 
 RUN pdm export -f requirements --output requirements.txt --without-hashes
 
-#COPY pyproject.toml pdm.lock ./
-#RUN pip install pdm && \
+# COPY pyproject.toml pdm.lock ./
+# RUN pip install pdm && \
 #    pdm install --no-ansi --no-interaction
 
 
