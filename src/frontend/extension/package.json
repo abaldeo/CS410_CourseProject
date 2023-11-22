@@ -53,6 +53,9 @@
           "tabs/signup.html"
         ]
       }
-    ]
+    ],
+    "action": {
+      
+    }
   }
 }

@@ -9,9 +9,40 @@ import SettingsIcon from '@mui/icons-material/Settings'
 import LogoutIcon from '@mui/icons-material/Logout'
 import { login, isAuthenticated } from "../src/utils/auth"
 import {logout} from "../src/utils/auth"
+import {fetchSummary} from "../src/utils/summary"
 
 // const [isLoggedIn, setIsLoggedIn] = useState(false)
+// chrome.runtime.onMessage.addListener(
+//   function(request, sender, sendResponse) {
+//     console.log(sender.tab ?
+//                 "from a content script:" + sender.tab.url :
+//                 "from the extension");
+//     if (request.greeting === "hello")
+//       chrome.windows.create({
+//         url: "./tabs/summary.html",
+//         type: "popup",
+//         height: 500,
+//         width: 500
+//       })
+//   }
+// );
 
+// const getBullets = async (course, video) => {
+//   await fetchSummary(course, video).then(res => {
+//     return res
+//   })
+// }
+
+// let summaryString = ""
+// chrome.runtime.onMessage.addListener(
+//   function(request, sender, sendResponse) {
+//     console.log(request.url_string);
+//     if (request.cn != "")
+//       fetchSummary(request.cn, request.vn).then(res => {
+//         sendResponse({bullets: res})
+//     })
+//   }
+// );
 
 
 function Login() {
@@ -123,6 +154,7 @@ function IndexPopup() {
   const getCurrentUrl = async () => {
     const [tab] = await chrome.tabs.query({active: true, currentWindow: true})
     setCurrentUrl(tab.url)
+    const response = await chrome.tabs.sendMessage(tab.id, {url_string: tab.url});
   }
 
   const getCurrentUsername = async () => {
@@ -141,6 +173,7 @@ function IndexPopup() {
   }, [currentUrl, currentUsername])
   
   if (currentUrl.includes("coursera.org/learn")) {
+    console.log(currentUrl.split('/')[4].replace('-', ''))
     return (
       <div className={style.div}>
         <Box sx={{display: "flex", justifyContent: "space-between"}}>
