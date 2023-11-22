@@ -52,6 +52,10 @@ async def example_task():
 
     return {"message": "success"}
 
+@app.get("/health", status_code=200)
+async def health_check():
+    return {"message": "healthy"}
+
 app.include_router(api)
 
 
