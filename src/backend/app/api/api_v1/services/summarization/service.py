@@ -32,13 +32,14 @@ async def fetchSummary(courseName: str, videoName: str) -> dict:
     Returns:
         dict: Summary results or None
     """
-    cache_results: dict | None = check_cache(courseName=courseName, video_name=videoName, 
+    if videoName
+    cache_results: dict | None = check_cache(course_name=courseName, video_name=videoName, 
                                              redis_instance=REDIS_INSTANCE)
     if cache_results:
         cache_results.update({"status": True, "msg": "Success"})
         return cache_results
     else:
-        db_results: str | None = get_summary_from_s3(courseName=courseName, video_name=videoName)
+        db_results: str | None = get_summary_from_s3(course_name=courseName, video_name=videoName)
         if db_results:
             db_results['summary'] = create_html_bullet_point(db_results['summary'])
             db_results.update({"status": True, "msg": "Success"})
@@ -71,7 +72,7 @@ async def generateSummary(summary_model: SummaryRequestModel) -> dict:
     elif not summary_model.transcript:
         return failure_dict
     else:
-        txt = summary_model.transcript
+        txt = Document(page_content=summary_model.transcript)
     try:
         summary_result = generate_summary(txt_to_summarize=txt, 
                                         gpt_model_name=settings.GPT_MODEL_NAME) # Assuming only one doc
@@ -87,6 +88,6 @@ async def generateSummary(summary_model: SummaryRequestModel) -> dict:
         result.update(summary_model.json())
         result.pop("transcript", "")
         return result
-    except Exception:
+    except Exception as exception:
         return failure_dict
     
