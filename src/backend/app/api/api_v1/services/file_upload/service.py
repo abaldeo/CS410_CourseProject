@@ -2,7 +2,7 @@ import pathlib
 from fastapi import APIRouter, UploadFile, File, HTTPException, status
 from fastapi.responses import Response, FileResponse, StreamingResponse
 from app.core.config import get_settings
-from .core import upload_transcript, retrieve_transcript, upload_slide, retrieve_slide
+from .core import upload_transcript, retrieve_transcript, upload_slide, retrieve_slide, S3Utils
 from pydantic import BaseModel, HttpUrl
 from loguru import logger
 router = r = APIRouter()
@@ -30,7 +30,6 @@ class FileUploadResult(BaseModel):
     Represents the result of an upload operation
 
     Attributes:
-        file (Bytes): File saved to memory
         path (Path | str): Path to file in local storage
         url (HttpUrl | str): A URL for accessing the object.
         size (int): Size of the file in bytes.
@@ -39,7 +38,6 @@ class FileUploadResult(BaseModel):
         error (str): Error message for failed upload.
         message: Response Message
     """
-    file: bytes = b''
     path: str = ''
     url: HttpUrl | str = ''
     size: int = 0
@@ -57,8 +55,13 @@ async def upload_lecture_transcript(req: TranscriptUploadModel):
     transcriptText = req.transcriptText
     settings = get_settings()
     logger.debug(f"User {userName} uploading transcript for {courseName} - {videoName}")      
-    result = await upload_transcript(courseName, videoName, transcriptText, settings)
-    logger.info(f"{courseName} - {videoName} transcript uploaded successfully.")
+    file_url = await upload_transcript(courseName, videoName, transcriptText, settings)
+    message = f"{courseName} - {videoName} transcript uploaded successfully."
+    logger.info(message)
+    result = FileUploadResult(url=file_url, message=message,
+                            filename=file_url.split('/')[-1], size=len(transcriptText),
+                            content_type=CONTENT_TYPE_MAP['.txt'])
+  
     return result 
 
 @router.get("/retrieveTranscript/")
@@ -148,22 +151,19 @@ async def get_lecture_slide(courseName: str, slideFileName: str, userName: str =
             raise e
         raise HTTPException(status_code=500, detail=str(e))
 
-@router.get("/listSlides")
-def list_lecture_slides(courseName: str='', userName: str = '', detail: bool = False):
+@router.get("/listLectureMaterials")
+def list_lecture_materials(courseName: str='', file_type='', userName: str = '', detail: bool = False):
     settings = get_settings()
     try:
-        return list_s3_bucket_contents(courseName, 'slides', detail, settings)
+        if not file_type or 'all' in str(file_type).lower():
+            result = []
+            for file_type in ['slides', 'transcripts']:
+                result.extend(list_s3_bucket_contents(courseName, file_type, detail, settings))
+            return result
+        return list_s3_bucket_contents(courseName, file_type, detail, settings)
     except Exception as e:
         logger.error(e)
 
-
-@router.get("/listTranscripts")
-def list_lecture_slides(courseName: str='', userName: str = '', detail: bool = False):
-    settings = get_settings()
-    try:
-        return list_s3_bucket_contents(courseName, 'transcripts', detail, settings)
-    except Exception as e:
-        logger.error(e)
 
 @router.delete("/removeCourseFile")
 def remove_course_file(fileName: str, courseName: str = '', userName: str = ''):
@@ -205,7 +205,25 @@ def list_s3_bucket_contents(courseName, courseFolder, detail, settings):
         results = []
         for dir in dirs:
             course = dir.split('/')[-2]
-            results.extend(s3.ls(f"{bucket_name}/{course}/{courseFolder}/", detail))
+            files = s3.ls(f"{bucket_name}/{course}/{courseFolder}/", detail)
+            results.extend(format_file_listing(files, course, courseFolder, detail, settings))
         return results
     else:
-        return  s3.ls(f"{bucket_name}/{courseName}/{courseFolder}/", detail)
+        files=  s3.ls(f"{bucket_name}/{courseName}/{courseFolder}/", detail)
+        results= format_file_listing(files, courseName, courseFolder, detail, settings)
+        return results
+    
+
+def format_file_listing(files, courseName, courseFolder, detail, settings):
+    results = []
+    for file in files:
+        fn = file['Key'] if detail else file
+        mydict = {"file": fn.split('/')[-1],
+        "path":  S3Utils.make_s3_path(fn),
+        "url":  S3Utils.make_s3_url(fn, settings.S3_ENDPOINT_URL),
+        "course": courseName,
+        "type": courseFolder
+        }
+        if detail: mydict.update(file)
+        results.append( mydict)
+    return results

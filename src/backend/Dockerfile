@@ -1,4 +1,5 @@
 
+
 FROM python:3.11 as requirements-stage
 WORKDIR /tmp
 
@@ -12,14 +13,14 @@ COPY ./pyproject.toml ./pdm.lock* /tmp/
 
 RUN pdm export -f requirements --output requirements.txt --without-hashes
 
-#COPY pyproject.toml pdm.lock ./
-#RUN pip install pdm && \
+# COPY pyproject.toml pdm.lock ./
+# RUN pip install pdm && \
 #    pdm install --no-ansi --no-interaction
 
 
 FROM python:3.11
 
-RUN mkdir /app
+RUN mkdir -p /app
 WORKDIR /app
 
 ENV PYTHONDONTWRITEBYTECODE 1
@@ -30,8 +31,14 @@ RUN apt update && \
 
 COPY --from=requirements-stage /tmp/requirements.txt ./requirements.txt
 
-RUN pip install --no-cache-dir --upgrade -r requirements.txt
+RUN pip install --upgrade pip
+RUN pip install --no-cache-dir -r ./requirements.txt
 
 COPY . .
 
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+EXPOSE 8000
+
+ENV PYTHONPATH=/app
+
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000", "--app-dir", "./app/"]
+

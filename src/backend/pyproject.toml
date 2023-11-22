@@ -49,6 +49,8 @@ dependencies = [
     "rank-bm25>=0.2.2",
     "WebSockets>=12.0",
     "s3fs>=2023.9.0",
+    "gcloud>=0.18.3",
+    "deptry>=0.12.0",
 ]
 requires-python = ">=3.11,<3.12"
 readme = "../../README.md"

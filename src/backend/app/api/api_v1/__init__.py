@@ -21,12 +21,12 @@ v1_router.include_router(
     tags=["users"],
     dependencies=[Depends(get_current_active_user)],
 )
-v1_router.include_router(
-    bot_router,
-    prefix="/v1",    
-    tags=["bot"],
-    # dependencies=[Depends(get_current_active_user)],
-)
+# v1_router.include_router(
+#     bot_router,
+#     prefix="/v1",    
+#     tags=["bot"],
+#     # dependencies=[Depends(get_current_active_user)],
+# )
 
 # v1_router.include_router(
 #     embedding_router,
