@@ -66,7 +66,7 @@ const Summary = () => {
         console.log(response.bullets.summary)
         const parser = new DOMParser()
         const bulletPoints = parser.parseFromString(response.bullets.summary, "text/html");
-        document.querySelectorAll('button[id="save-note-button"]')[0].appendChild(bulletPoints.documentElement)
+        document.getElementById('video-item-title-and-save-note').appendChild(bulletPoints.documentElement)
     }
     // useEffect(() => {
     //     getCurrentUrl()
