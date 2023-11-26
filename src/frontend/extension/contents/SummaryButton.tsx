@@ -31,6 +31,10 @@ const Summary = () => {
           console.log(request.url_string);
           if (request.url_string != "")
             setCurrentUrl(request.url_string);
+            console.log(currentUrl)
+            sendResponse("Received")
+            setCourseName(currentUrl.split('/')[4].replace('-', ''))
+            setVideoName(currentUrl.split('/')[7])
         }
     );
     // const getCurrentUrl = async () => {

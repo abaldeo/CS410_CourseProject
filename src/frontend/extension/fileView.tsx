@@ -16,10 +16,10 @@ export const FileView = ({closeFileView}) => {
     fetchTranscriptList().then(res => {
         setList(res)
     })
-    for (let i = 0; i < list.length; i++) {
-        list[i] = list[i].slice(30);
-    }
-    const arrayDataItems = list.map((transcript) => <ListItem>{transcript}</ListItem>)
+    // for (let i = 0; i < list.length; i++) {
+    //     list[i] = list[i].slice(30);
+    // }
+    const arrayDataItems = list.map((transcript) => <ListItem >{transcript.slice(30)}</ListItem>)
     return (
         <div
         style={{
