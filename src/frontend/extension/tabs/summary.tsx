@@ -5,7 +5,7 @@ import {fetchSummary} from "../../src/utils/summary"
 function showSummary() {
 
     const [videoName, setVideoName] = useState("")
-    const [summary, setSummary] = useState("")
+    const [summary, setSummary] = useState("<p>Loading...</p>")
 
     chrome.runtime.onMessage.addListener(
         function(request, sender, sendResponse) {

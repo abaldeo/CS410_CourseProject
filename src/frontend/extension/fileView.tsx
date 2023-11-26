@@ -19,7 +19,7 @@ export const FileView = ({closeFileView}) => {
     const arrayDataItems = list.map((transcript) => <ListItem sx={{cursor: "pointer"}} onClick={() => {
         setTimeout(() => {
             sendMessage(transcript.slice(33))
-        }, 3000)
+        }, 1000)
         chrome.windows.create({
             url: "./tabs/summary.html",
             type: "popup",
