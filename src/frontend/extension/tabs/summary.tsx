@@ -1,47 +1,32 @@
 import { useState, useEffect } from "react"
 import React from 'react'
+import {fetchSummary} from "../../src/utils/summary"
 
 function showSummary() {
-    const [currentUrl, setCurrentUrl] = useState<string>("")
-    const [videoName, setVideoName] = useState<string>("")
-    const [courseName, setCourseName] = useState<string>("")
-    
-    const getCurrentUrl = async () => {
-        const [tab] = await chrome.tabs.query({active: true, currentWindow: true})
-        setCurrentUrl(tab.url)
-    }
-    
-    function getCourseName() {
-        setCourseName(currentUrl.split('/')[4].replace('-', ''))
-    }
 
-    function getVideoName() {
-        setVideoName(currentUrl.split('/')[7])
-    }
+    const [videoName, setVideoName] = useState("")
+    const [summary, setSummary] = useState("")
 
-    function handleSuccess() {
-        console.log(fetchSummary(courseName, videoName))
-    }
+    chrome.runtime.onMessage.addListener(
+        function(request, sender, sendResponse) {
+          console.log(request.url_string);
+          if (request.from === "fileView")
+            sendResponse("Received")
+            console.log("Received")
+            console.log(request.videoName)
+            setVideoName(request.videoName.split(".")[0])
+        }
+    );
 
-    function handleFailure() {
-        alert("Failed to fetch summary")
-    }
-    
-    const handleSubmit = async (e) => {
-        e.preventDefault()
-        fetchSummary(courseName, videoName).then(handleSuccess, handleFailure)
-    }
-    useEffect(() => {
-        getCurrentUrl()
-      }, [currentUrl])
-    useEffect(() => {
-        getCourseName(),
-        getVideoName()
-      }, [courseName, videoName])
+    fetchSummary("cs410", videoName).then(res => {
+        
+        setSummary(res.summary)
+        console.log(res.summary)
+    })
     
     return(
         <div>
-            <button>Hi</button>
+            <p dangerouslySetInnerHTML={{__html: summary}}></p>
         </div>
     )
 }

@@ -5,7 +5,7 @@ export {}
 chrome.runtime.onMessage.addListener(
     function(request, sender, sendResponse) {
       console.log(request.url_string);
-      if (request.cn != "") {
+      if (request.from === "summaryButton") {
         fetchSummary(request.cn, request.vn).then(res => {
           sendResponse({bullets: res})
         })

@@ -66,7 +66,7 @@ const Summary = () => {
         getVideoName()
         console.log(courseName)
         console.log(videoName)
-        const response = await chrome.runtime.sendMessage({cn: courseName, vn: videoName});
+        const response = await chrome.runtime.sendMessage({from: "summaryButton", cn: courseName, vn: videoName});
         console.log(response.bullets.summary)
         const parser = new DOMParser()
         const bulletPoints = parser.parseFromString(response.bullets.summary, "text/html");

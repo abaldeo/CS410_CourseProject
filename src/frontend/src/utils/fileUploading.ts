@@ -9,6 +9,5 @@ export const fetchTranscriptList = async () => {
         throw new Error('Internal server error');
     }
     const data = await response.json();
-    console.log(data)
     return data;
 }

@@ -4,12 +4,9 @@ import {fetchTranscriptList} from "../src/utils/fileUploading"
 import {List, ListItem} from '@mui/material'
 
 
-function showlist() {
-    let list = []
-    fetchTranscriptList().then(res => {
-        list = res
-    })
-  }
+const sendMessage = async (video) => {
+    const response = await chrome.runtime.sendMessage({from: "fileView", courseName: "cs410", videoName: video })
+}
 
 export const FileView = ({closeFileView}) => {
     const [list, setList] = useState([])
@@ -19,7 +16,18 @@ export const FileView = ({closeFileView}) => {
     // for (let i = 0; i < list.length; i++) {
     //     list[i] = list[i].slice(30);
     // }
-    const arrayDataItems = list.map((transcript) => <ListItem >{transcript.slice(30)}</ListItem>)
+    const arrayDataItems = list.map((transcript) => <ListItem sx={{cursor: "pointer"}} onClick={() => {
+        setTimeout(() => {
+            sendMessage(transcript.slice(33))
+        }, 3000)
+        chrome.windows.create({
+            url: "./tabs/summary.html",
+            type: "popup",
+            height: 500,
+            width: 500
+          })
+        sendMessage(transcript.slice(33))
+    }}>{transcript.slice(30)}</ListItem>)
     return (
         <div
         style={{
