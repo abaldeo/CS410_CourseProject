@@ -10,6 +10,8 @@ import LogoutIcon from '@mui/icons-material/Logout'
 import { login, isAuthenticated } from "../src/utils/auth"
 import {logout} from "../src/utils/auth"
 import {fetchSummary} from "../src/utils/summary"
+import {fetchTranscriptList} from "../src/utils/fileUploading"
+import { FileView} from "./fileView"
 
 // const [isLoggedIn, setIsLoggedIn] = useState(false)
 // chrome.runtime.onMessage.addListener(
@@ -149,7 +151,9 @@ function IndexPopup() {
   const [currentUsername, setCurrentUsername] = useState<string>("")
   const [openChatbox, setOpenChatbox] = useState(false)
   const [openUpload, setOpenUpload] = useState(false)
+  const [openFiles, setOpenFiles] = useState(false)
   const [openSettings, setOpenSettings] = useState(false)
+
 
   const getCurrentUrl = async () => {
     const [tab] = await chrome.tabs.query({active: true, currentWindow: true})
@@ -208,6 +212,14 @@ function IndexPopup() {
           }}
           value="Chat Box">Ask a Question
         </button>
+        <button
+          className={style.button}
+          onClick={() => {
+            openFiles ? setOpenFiles(false) : setOpenFiles(true)
+          }}
+          value="View Uploaded Files">View Uploaded Files
+        </button>
+        {openFiles ? <FileView closeFileView={() => setOpenFiles(false)}/> : null}
       </div>
     )
   }
