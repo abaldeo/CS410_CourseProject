@@ -32,8 +32,8 @@ async def fetchSummary(courseName: str, videoName: str) -> dict:
     Returns:
         dict: Summary results or None
     """
-    if videoName
-    cache_results: dict | None = check_cache(course_name=courseName, video_name=videoName, 
+    if videoName:
+        cache_results: dict | None = check_cache(course_name=courseName, video_name=videoName, 
                                              redis_instance=REDIS_INSTANCE)
     if cache_results:
         cache_results.update({"status": True, "msg": "Success"})
