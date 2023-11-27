@@ -29,7 +29,7 @@ interface Message {
     word-wrap: break-word;
   `;
   
-  export const ChatBox: React.FC = ({closePopup}) => {
+  function ChatBox({}) {
     const [messages, setMessages] = useState<Message[]>([]);
     const [input, setInput] = useState('');
     const [isBotTyping, setIsBotTyping] = useState(false);
@@ -67,7 +67,7 @@ interface Message {
   
   
     return (
-    <Box display="flex" flexDirection="column" alignItems="center" p={2} width="218px" height="500px" bgcolor="#FDFCFA" borderColor="#A9A9A9">
+    <Box display="flex" flexDirection="column" alignItems="center" p={2} bgcolor="#FDFCFA" borderColor="#A9A9A9" height="100vh">
         <Box display="flex" flexDirection="column" width="100%" mb={2} maxHeight="400px" overflow="auto" flexGrow={1}>
         {messages.map((message, index) => (
             <Box
@@ -109,3 +109,5 @@ interface Message {
     </Box>
     );
   };
+
+  export default ChatBox

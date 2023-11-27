@@ -5,6 +5,7 @@ from langchain.chains.summarize import load_summarize_chain
 from langchain.docstore.document import Document
 from langchain.chat_models import ChatOpenAI
 from pydantic import BaseModel
+from typing import Optional
 from urllib.parse import urlparse
 from botocore.exceptions import ClientError
 from redis import Redis
@@ -21,7 +22,8 @@ class SummaryRequestModel(BaseModel):
     userId: int
     courseName: str
     videoName: str
-    S3Path: str
+    transcript: Optional[str]
+    s3_path: Optional[str]
 
 
 async def upload_summary_to_s3(course_name: str, transcript_name: str, summary_text: str):
@@ -43,10 +45,10 @@ async def upload_summary_to_s3(course_name: str, transcript_name: str, summary_t
         aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY
     )
 
-    # Upload the transcript text to DigitalOcean Spaces
+    # Upload the transcript text
     await client.put_object(
         Bucket=settings.S3_BUCKET_NAME, 
-        Key=f"coursebuddy/cs410/summaries/{course_name}/{transcript_name}", 
+        Key=f"{course_name}/summaries/{transcript_name}", 
         Body=summary_text, 
         ACL='private', 
         Metadata={
@@ -70,6 +72,21 @@ def get_transcript_from_s3(s3_path: str) -> List[Document]:
                           aws_access_key_id=settings.AWS_ACCESS_KEY_ID, aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY)
     try:
         return loader.load()
+    except ClientError:
+        # Handles if the s3 path DNE
+        return None
+
+def get_summary_from_s3(course_name: str, video_name: str) -> dict | None:
+    loader = S3FileLoader(bucket=settings.S3_BUCKET_NAME, key=f"{course_name}/summaries/{video_name}", 
+                          region_name=settings.AWS_REGION_NAME, endpoint_url=settings.S3_ENDPOINT_URL,
+                          aws_access_key_id=settings.AWS_ACCESS_KEY_ID, aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY)
+    try:
+        doc: Document = loader.load()[0]
+        return {
+            "courseName": course_name, 
+            "videoName": video_name, 
+            "summary": doc.page_content
+            }
     except ClientError:
         # Handles if the s3 path DNE
         return None
@@ -125,6 +142,21 @@ def chunk_docs(docs,text_splitter, clean=True):
     chunks = text_splitter.split_documents(docs)
     return chunks
 
+def create_html_bullet_point(input_str: str) -> str:
+    """Converts a string of multiple items into an html bullet point list 
+
+    Args:
+        input_str (str): Summary string with each bullet point separated by /n/n
+
+    Returns:
+        str: html structure as a string e.g. <ul><li>bullet one</li></ul>
+    """
+    html_string = "<ul>"
+    for bullet_point in input_str.split("\n\n"):
+        html_string += f"<li>{bullet_point}</li>"
+    html_string += "</ul>"
+    return html_string
+
 def generate_summary(txt_to_summarize: Document, gpt_model_name: str) -> str:
     """Uses an LLM to generate a summary for a transcript
 
@@ -134,7 +166,7 @@ def generate_summary(txt_to_summarize: Document, gpt_model_name: str) -> str:
     Returns:
         str: Returns summarization of the transcript
     """
-    llm = ChatOpenAI(temperature=0, model_name=gpt_model_name)
+    llm = ChatOpenAI(temperature=0, model_name=gpt_model_name, openai_api_key=settings.OPENAI_API_KEY)
 
     # Remove spaces and new lines from text to summarize
     cleaned_txt = re.sub(r'[ |\t]+', ' ', txt_to_summarize.page_content)
@@ -179,4 +211,3 @@ def generate_summary(txt_to_summarize: Document, gpt_model_name: str) -> str:
     num_of_bullet_points = -(num_of_tokens // -200) # Equivalent of math.ceil()
     summary = map_reduce_chain.run(**{'input_documents': chunks, 'num_bullet_points': num_of_bullet_points})
     return summary
-

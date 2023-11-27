@@ -13,9 +13,12 @@
     "@emotion/cache": "^11.11.0",
     "@emotion/react": "^11.11.1",
     "@emotion/styled": "^11.11.0",
+    "@mui/icons-material": "^5.14.18",
     "@mui/material": "^5.14.16",
     "@mui/styled-engine-sc": "^6.0.0-alpha.4",
-    "plasmo": "^0.83.0",
+    "@react-navigation/native-stack": "^6.9.17",
+    "html-react-parser": "^5.0.6",
+    "plasmo": "^0.84.0",
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "react-router-dom": "^6.17.0",
@@ -38,7 +41,8 @@
       "tabs",
       "identity",
       "identity.email",
-      "windows"
+      "windows",
+      "scripting"
     ],
     "web_accesible_resources": [
       {
@@ -46,9 +50,11 @@
           "<all_urls>"
         ],
         "resources": [
-          "tabs/chatbox.html"
+          "tabs/chatbox.html",
+          "tabs/signup.html"
         ]
       }
-    ]
+    ],
+    "action": {}
   }
 }

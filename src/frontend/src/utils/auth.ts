@@ -1,4 +1,4 @@
-import decodeJwt from 'jwt-decode';
+import {jwtDecode} from 'jwt-decode';
 
 export const isAuthenticated = () => {
   const permissions = localStorage.getItem('permissions');
@@ -26,7 +26,7 @@ export const login = async (email: string, password: string) => {
   formData.append('username', email);
   formData.append('password', password);
 
-  const request = new Request('/api/token', {
+  const request = new Request('https://sturdy-zebra-pw79rpqq4g936jp4-8000.app.github.dev/api/token', {
     method: 'POST',
     body: formData,
   });
@@ -47,7 +47,7 @@ export const login = async (email: string, password: string) => {
   }
 
   if ('access_token' in data) {
-    const decodedToken: any = decodeJwt(data['access_token']);
+    const decodedToken: any = jwtDecode(data['access_token']);
     localStorage.setItem('token', data['access_token']);
     localStorage.setItem('permissions', decodedToken.permissions);
   }
@@ -84,7 +84,7 @@ export const signUp = async (
   formData.append('username', email);
   formData.append('password', password);
 
-  const request = new Request('/api/signup', {
+  const request = new Request('https://sturdy-zebra-pw79rpqq4g936jp4-8000.app.github.dev/api/signup', {
     method: 'POST',
     body: formData,
   });
@@ -104,7 +104,7 @@ export const signUp = async (
   }
 
   if ('access_token' in data) {
-    const decodedToken: any = decodeJwt(data['access_token']);
+    const decodedToken: any = jwtDecode(data['access_token']);
     localStorage.setItem('token', data['access_token']);
     localStorage.setItem('permissions', decodedToken.permissions);
   }
