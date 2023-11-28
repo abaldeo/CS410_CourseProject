@@ -26,29 +26,29 @@ const Summary = () => {
     const [videoName, setVideoName] = useState<string>("")
     const [courseName, setCourseName] = useState<string>("")
     
-    chrome.runtime.onMessage.addListener(
-        function(request, sender, sendResponse) {
-          console.log(request.url_string);
-          if (request.url_string != "")
-            setCurrentUrl(request.url_string);
-            console.log(currentUrl)
-            sendResponse("Received")
-            setCourseName(currentUrl.split('/')[4].replace('-', ''))
-            setVideoName(currentUrl.split('/')[7])
-        }
-    );
+    // chrome.runtime.onMessage.addListener(
+    //     function(request, sender, sendResponse) {
+    //       console.log(request.url_string);
+    //       if (request.url_string != "")
+    //         setCurrentUrl(request.url_string);
+    //         console.log(currentUrl)
+    //         sendResponse("Received")
+    //         setCourseName(currentUrl.split('/')[4].replace('-', ''))
+    //         setVideoName(currentUrl.split('/')[7])
+    //     }
+    // );
     // const getCurrentUrl = async () => {
-    //     const [tab] = await chrome.tabs.query({active: true, currentWindow: true})
-    //     setCurrentUrl(tab.url)
-    //}
+    //     // const [tab] = await chrome.tabs.query({active: true, currentWindow: true})
+    //     setCurrentUrl(location.href)
+    // }
     
     function getCourseName() {
-        console.log(currentUrl.split('/'))
-        setCourseName(currentUrl.split('/')[4].replace('-', ''))
+        console.log(location.href.split('/'))
+        setCourseName(location.href.split('/')[4].replace('-', ''))
     }
 
     function getVideoName() {
-        setVideoName(currentUrl.split('/')[7])
+        setVideoName(location.href.split('/')[7])
     }
 
     // function handleSuccess() {
@@ -62,8 +62,10 @@ const Summary = () => {
     
     const handleSubmit = async (e) => {
         e.preventDefault()
-        getCourseName()
-        getVideoName()
+        // setCurrentUrl(location.href)
+        // getCourseName()
+        // console.log(location.href)
+        // getVideoName()
         console.log(courseName)
         console.log(videoName)
         const response = await chrome.runtime.sendMessage({from: "summaryButton", cn: courseName, vn: videoName});
@@ -72,9 +74,13 @@ const Summary = () => {
         const bulletPoints = parser.parseFromString(response.bullets.summary, "text/html");
         document.getElementById('video-item-title-and-save-note').appendChild(bulletPoints.documentElement)
     }
+
+    useEffect(() => { setCourseName(location.href.split('/')[4].replace('-', '')), setVideoName(location.href.split('/')[7]) }, [])
     // useEffect(() => {
-    //     getCurrentUrl()
-    //   }, [currentUrl])
+    //     getCurrentUrl(),
+    //     getCourseName(),
+    //     getVideoName()
+    //   }, [currentUrl, courseName, videoName])
     // useEffect(() => {
     //     getCourseName(),
     //     getVideoName()

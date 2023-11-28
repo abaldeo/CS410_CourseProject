@@ -158,7 +158,7 @@ function IndexPopup() {
   const getCurrentUrl = async () => {
     const [tab] = await chrome.tabs.query({active: true, currentWindow: true})
     setCurrentUrl(tab.url)
-    const response = await chrome.tabs.sendMessage(tab.id, {url_string: tab.url});
+    // const response = await chrome.tabs.sendMessage(tab.id, {url_string: tab.url});
   }
 
   const getCurrentUsername = async () => {
