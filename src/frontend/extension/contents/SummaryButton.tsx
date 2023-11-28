@@ -71,7 +71,7 @@ const Summary = () => {
         // console.log(videoName)
         if (summaryVisible == false) {
             const response = await chrome.runtime.sendMessage({from: "summaryButton", cn: courseName, vn: videoName});
-            // console.log(response.bullets.summary)
+            console.log(response.bullets.summary)
             const parser = new DOMParser()
             const bulletPoints = parser.parseFromString(response.bullets.summary, "text/html");
             document.getElementById('video-item-title-and-save-note').appendChild(bulletPoints.documentElement)

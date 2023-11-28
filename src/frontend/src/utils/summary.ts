@@ -1,10 +1,11 @@
 import {jwtDecode} from 'jwt-decode';
+import {BACKEND_URL} from '../config/index'
 
 export const fetchSummary = async (course_Name: string, video_Name: string) => {
     if (!(course_Name.length > 0) || !(video_Name.length > 0)) {
         throw new Error('Course name or video name was not provided');
     }
-    const request = new Request('https://sturdy-zebra-pw79rpqq4g936jp4-8000.app.github.dev/api/v1/summarization/fetchSummary?courseName=' + course_Name + '&videoName=' + video_Name + '.en.txt', {
+    const request = new Request(BACKEND_URL + 'summarization/fetchSummary?courseName=' + course_Name + '&videoName=' + video_Name + '.en.txt', {
         method: 'GET'
       });
     const response = await fetch(request);

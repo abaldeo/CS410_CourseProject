@@ -11,14 +11,20 @@ const sendMessage = async (video) => {
 export const FileView = ({closeFileView}) => {
     const [list, setList] = useState([])
     fetchTranscriptList().then(res => {
-        setList(res)
+        var cleanArray = []
+        for (let i = 0; i < res.length; i++) {
+            if (res[i].type == "transcripts") {
+                cleanArray.push(res[i].file.split('_')[1])
+            }
+        }
+        setList(cleanArray)
     })
     // for (let i = 0; i < list.length; i++) {
     //     list[i] = list[i].slice(30);
     // }
     const arrayDataItems = list.map((transcript) => <ListItem sx={{cursor: "pointer"}} onClick={() => {
         setTimeout(() => {
-            sendMessage(transcript.slice(33))
+            sendMessage(transcript)
         }, 1000)
         chrome.windows.create({
             url: "./tabs/summary.html",
@@ -26,8 +32,8 @@ export const FileView = ({closeFileView}) => {
             height: 500,
             width: 500
           })
-        sendMessage(transcript.slice(33))
-    }}>{transcript.slice(30)}</ListItem>)
+        sendMessage(transcript)
+    }}>{(transcript)}</ListItem>)
     return (
         <div
         style={{

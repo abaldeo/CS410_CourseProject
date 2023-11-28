@@ -1,7 +1,8 @@
 import {jwtDecode} from 'jwt-decode';
+import { BACKEND_URL } from '../config';
 
 export const fetchTranscriptList = async () => {
-    const request = new Request('https://sturdy-zebra-pw79rpqq4g936jp4-8000.app.github.dev/api/v1/file_upload/listTranscripts', {
+    const request = new Request(BACKEND_URL + 'file_upload/listLectureMaterials', {
         method: 'GET'
       });
     const response = await fetch(request);
