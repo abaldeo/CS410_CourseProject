@@ -25,6 +25,7 @@ const Summary = () => {
     const [currentUrl, setCurrentUrl] = useState<string>("")
     const [videoName, setVideoName] = useState<string>("")
     const [courseName, setCourseName] = useState<string>("")
+    const [summaryVisible, setSummaryVisible] = useState<boolean>(false)
     
     // chrome.runtime.onMessage.addListener(
     //     function(request, sender, sendResponse) {
@@ -42,14 +43,14 @@ const Summary = () => {
     //     setCurrentUrl(location.href)
     // }
     
-    function getCourseName() {
-        console.log(location.href.split('/'))
-        setCourseName(location.href.split('/')[4].replace('-', ''))
-    }
+    // function getCourseName() {
+    //     console.log(location.href.split('/'))
+    //     setCourseName(location.href.split('/')[4].replace('-', ''))
+    // }
 
-    function getVideoName() {
-        setVideoName(location.href.split('/')[7])
-    }
+    // function getVideoName() {
+    //     setVideoName(location.href.split('/')[7])
+    // }
 
     // function handleSuccess() {
     //     console.log("hello")
@@ -66,13 +67,20 @@ const Summary = () => {
         // getCourseName()
         // console.log(location.href)
         // getVideoName()
-        console.log(courseName)
-        console.log(videoName)
-        const response = await chrome.runtime.sendMessage({from: "summaryButton", cn: courseName, vn: videoName});
-        console.log(response.bullets.summary)
-        const parser = new DOMParser()
-        const bulletPoints = parser.parseFromString(response.bullets.summary, "text/html");
-        document.getElementById('video-item-title-and-save-note').appendChild(bulletPoints.documentElement)
+        // console.log(courseName)
+        // console.log(videoName)
+        if (summaryVisible == false) {
+            const response = await chrome.runtime.sendMessage({from: "summaryButton", cn: courseName, vn: videoName});
+            // console.log(response.bullets.summary)
+            const parser = new DOMParser()
+            const bulletPoints = parser.parseFromString(response.bullets.summary, "text/html");
+            document.getElementById('video-item-title-and-save-note').appendChild(bulletPoints.documentElement)
+            setSummaryVisible(true)
+        } else {
+            var summaryText = document.getElementById('video-item-title-and-save-note').childNodes[2]
+            document.getElementById('video-item-title-and-save-note').removeChild(summaryText)
+            setSummaryVisible(false)
+        }
     }
 
     useEffect(() => { setCourseName(location.href.split('/')[4].replace('-', '')), setVideoName(location.href.split('/')[7]) }, [])
