@@ -56,8 +56,8 @@ def get_llm(model=settings.GPT_MODEL_NAME, provider=settings.LLM_PROVIDER, **kwa
         kwargs.setdefault("model_version", settings.AZURE_OPENAI_MODEL_VERSION)
         llm: LLM = AzureOpenAI(model_name=model, **kwargs)
     else:
-        from langchain.llms  import ChatOpenAI
-        
+        from langchain.chat_models import ChatOpenAI
+        kwargs.setdefault("api_key", settings.OPENAI_API_KEY)
         llm: LLM = ChatOpenAI(model_name=model, **kwargs)
     return llm 
 
