@@ -21,7 +21,7 @@ export const FileUpload = ({closePopupUpload}) => {
           myHeaders.append('Authorization', `Bearer ${token}`);
           myHeaders.append('Content-Type', 'application/json');
     
-          const res = await fetch(`${BACKEND_URL}/bot/chat`, {
+          const res = await fetch(`${BACKEND_URL}/uploadTranscript/`, {
               method: 'POST',
               headers: myHeaders,
               body: body
