@@ -2,6 +2,7 @@ import { useState, useEffect } from "react"
 import React from 'react'
 import {fetchSummary} from "../../src/utils/summary"
 
+
 function showSummary() {
 
     const [videoName, setVideoName] = useState("")
@@ -21,7 +22,7 @@ function showSummary() {
     fetchSummary("cs410", videoName).then(res => {
         
         setSummary(res.summary)
-        console.log(res.summary)
+        console.log(res)
     })
     
     return(

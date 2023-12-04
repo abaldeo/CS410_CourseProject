@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { Box, TextField, Typography, Button, CircularProgress } from '@mui/material';
 import { styled } from '@mui/material/styles'
 import * as style from "./styles.module.css"
+import {fetchAnswer} from '../../src/utils/chatbotanswer'
 
 
 interface Message {
@@ -14,7 +15,11 @@ interface Message {
   }
   
   async function getAnswer(question: string): Promise<string> {
-    return question
+    var ans = ""
+    await fetchAnswer(question).then(res => {
+      ans = res
+    })
+    return ans
   }
   
   const MessageBubble = styled(Box)<MessageBubbleProps>`
@@ -49,13 +54,14 @@ interface Message {
         setIsBotTyping(true);
         setTimeout(async () => {
           const response = await getAnswer(input);
+          console.log(response)
           const bot_response: Message = {
             text: response,
             sender: 'bot',
           };
           setMessages((prevMessages) => [...prevMessages, bot_response]);
           setIsBotTyping(false);
-        }, 300);
+        }, 3000);
       }
     };
   

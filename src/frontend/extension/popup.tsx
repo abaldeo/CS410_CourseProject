@@ -47,6 +47,7 @@ import { FileView} from "./fileView"
 // );
 
 
+
 function Login() {
   // const [isLoggedIn, setIsLoggedIn] = useState(false)
   const [email, setEmail] = useState('')
@@ -59,7 +60,8 @@ function Login() {
   }
 
   function handleSuccess() {
-    console.log(isAuthenticated())
+    // console.log(isAuthenticated())
+    // window.sessionStorage.setItem('user', email)
     window.close()
   }
   function handleFailure() {
@@ -148,8 +150,8 @@ function Login() {
 
 function IndexPopup() {
   const [currentUrl, setCurrentUrl] = useState<string>("")
-  const [currentUsername, setCurrentUsername] = useState<string>("")
-  const [openChatbox, setOpenChatbox] = useState(false)
+  // const [currentUsername, setCurrentUsername] = useState<string>("")
+  // const [openChatbox, setOpenChatbox] = useState(false)
   const [openUpload, setOpenUpload] = useState(false)
   const [openFiles, setOpenFiles] = useState(false)
   const [openSettings, setOpenSettings] = useState(false)
@@ -158,23 +160,24 @@ function IndexPopup() {
   const getCurrentUrl = async () => {
     const [tab] = await chrome.tabs.query({active: true, currentWindow: true})
     setCurrentUrl(tab.url)
-    const response = await chrome.tabs.sendMessage(tab.id, {url_string: tab.url});
+    // const response = await chrome.tabs.sendMessage(tab.id, {url_string: tab.url});
   }
 
-  const getCurrentUsername = async () => {
-    chrome.identity.getProfileUserInfo(function(info) {
-      setCurrentUsername(info.email.substring(0, info.email.indexOf("@")))
-      if (info.email.length == 0) {
-        setCurrentUsername("Anon")
-      }
-    })
-  }
+  // function getCurrentUsername() {
+  //   // chrome.identity.getProfileUserInfo(function(info) {
+  //   //   setCurrentUsername(info.email.substring(0, info.email.indexOf("@")))
+  //   //   if (info.email.length == 0) {
+  //   //     setCurrentUsername("Anon")
+  //   //   }
+  //   // })
+  //   setCurrentUsername(window.sessionStorage.getItem('user'))
+  // }
 
 
   useEffect(() => {
-    getCurrentUrl(),
-    getCurrentUsername()
-  }, [currentUrl, currentUsername])
+    getCurrentUrl()
+    // getCurrentUsername()
+  }, [currentUrl])
   
   if (currentUrl.includes("coursera.org/learn")) {
     console.log(currentUrl.split('/')[4].replace('-', ''))
@@ -192,7 +195,7 @@ function IndexPopup() {
           </Button>
         </Box>
         <h1 className={style.h1}>
-          Welcome to CourseBuddy, {currentUsername}!
+          Welcome to CourseBuddy!
         </h1>
         <button
           className={style.button}
