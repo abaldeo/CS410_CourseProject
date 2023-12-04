@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react"
 import * as style from "./styles.module.css"
-import {fetchTranscriptList} from "../src/utils/fileUploading"
+import {fetchTranscriptList} from "./utils/fileUploading"
 import {List, ListItem} from '@mui/material'
 
 

@@ -1,6 +1,6 @@
 import type { PlasmoCSConfig, PlasmoGetInlineAnchor } from "plasmo"
 import cssText from "data-text:../styles.module.css"
-import {fetchSummary} from "../../src/utils/summary"
+import {fetchSummary} from "../utils/summary"
 import { useState, useEffect } from "react"
 
 import * as style from "../styles.module.css"

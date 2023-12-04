@@ -1,4 +1,4 @@
-import {fetchSummary} from "../src/utils/summary"
+import {fetchSummary} from "./utils/summary"
 
 export {}
 
