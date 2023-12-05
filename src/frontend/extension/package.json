@@ -36,8 +36,7 @@
   },
   "manifest": {
     "permissions": [
-      "windows",
-      "scripting"
+      "tabs"
     ],
     "web_accesible_resources": [
       {
