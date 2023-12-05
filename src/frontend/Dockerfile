@@ -1,16 +1,32 @@
 FROM node:16
 
-ADD ./extension/package.json .
+# Set the working directory inside the container
+WORKDIR /app
+
+# Copy package.json and package-lock.json to the working directory
+COPY ./extension/package.json ./
 
 ENV NODE_PATH=/node_modules
-ENV PATH=$PATH:/node_modules/.bin
+
+# Install dependencies
 RUN npm install --legacy-peer-deps
+
+# Install serve
+RUN npm install -g serve
+
 RUN npm install serve
-WORKDIR /app
-ADD . /app
+
+
+# Copy the rest of your app's source code from your host to your image filesystem
+COPY . .
+# ADD . /app
+
+# Build the app
+RUN npm run build
 
 EXPOSE 8000
 EXPOSE 35729
+EXPOSE 5000
 
 ENTRYPOINT ["/bin/bash", "/app/run.sh"]
 CMD ["start"]
