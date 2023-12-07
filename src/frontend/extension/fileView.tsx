@@ -22,7 +22,7 @@ export const FileView = ({closeFileView}) => {
     // for (let i = 0; i < list.length; i++) {
     //     list[i] = list[i].slice(30);
     // }
-    const arrayDataItems = list.map((transcript) => <ListItem sx={{cursor: "pointer"}} onClick={() => {
+    const arrayDataItems = list.map((transcript) => <ListItem sx={{cursor: "pointer", color: "#FFFFFF"}} onClick={() => {
         setTimeout(() => {
             sendMessage(transcript)
         }, 1000)
