@@ -25,7 +25,10 @@ export const FileUpload = ({closePopupUpload}) => {
           const myHeaders = new Headers();
           const token = localStorage.getItem('token');
           myHeaders.append('Authorization', `Bearer ${token}`);
-          myHeaders.append('Content-Type', `${headerType}`);
+          if (headerType) {
+            myHeaders.append('Content-Type', `${headerType}`);
+          }
+          myHeaders.append('accept', 'application/json');
           myHeaders.append("Access-Control-Allow-Origin", "*");
           const fullUrl = `${BACKEND_URL}file_upload/${endpt}`
           const res = await fetch(fullUrl, {
@@ -55,15 +58,15 @@ export const FileUpload = ({closePopupUpload}) => {
           setVideoName(currentUrl.split('/')[7])
         }
         else {
-          setCourseName("")
+          setCourseName("cs410")
           setVideoName("")
         }
 
         const ext = event.target.fileInput.files[0].name.split('.').pop();
         if (['pdf', 'ppt', 'pptx'].includes(ext)) {
           const formData = new FormData();
-          formData.append("slideFile", event.target.fileInput.files[0]); 
-          fetchWithAuth(formData, `uploadSlide?courseName=${courseName}&videoName=${videoName}&userName=${userName}`, "undefined");
+          formData.append("slideFile", event.target.fileInput.files[0], event.target.fileInput.files[0].name); 
+          fetchWithAuth(formData, `uploadSlide?courseName=cs410&videoName=${videoName}&userName=${userName}`, "");
         }
         else {
           const fileReader = new FileReader();
