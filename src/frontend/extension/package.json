@@ -2,7 +2,7 @@
   "name": "course-buddy-ai",
   "displayName": "CourseBuddyAI",
   "version": "0.0.1",
-  "description": "CourseBuddyAI is a Chrome extension designed to enhance the Coursera Online Learning Platform, allowing students to upload lecture transcripts and slides (PDF/PPT) for automated summarization. These documents will be indexed in a vector database. Subsequently, we will employ the Retrieval Augmentation Generation (RAG) technique, in combination with a large language model like ChatGPT to build a Q&A chatbot interface based on the uploaded course content.",
+  "description": "CourseBuddyAI is a Chrome extension designed to enhance the Coursera Online Learning Platform, allowing students to upload lecture transcripts and slides (PDF/PPT) for automated summarization.",
   "author": "Avinash Baldeo, Colton Bailey, Kacper Dural, Zach Pohl",
   "scripts": {
     "dev": "plasmo dev",
