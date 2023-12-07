@@ -2,7 +2,7 @@
   "name": "course-buddy-ai",
   "displayName": "CourseBuddyAI",
   "version": "0.0.1",
-  "description": "CourseBuddyAI is a Chrome extension designed to enhance the Coursera Online Learning Platform, allowing students to upload lecture transcripts and slides (PDF/PPT) for automated summarization.",
+  "description": "CourseBuddyAI is a Chrome extension that enhances the Coursera Platform, allowing users to upload lecture files for summarization.",
   "author": "Avinash Baldeo, Colton Bailey, Kacper Dural, Zach Pohl",
   "scripts": {
     "dev": "plasmo dev",
