@@ -1,6 +1,6 @@
 {
   "name": "course-buddy-ai",
-  "displayName": "Course buddy ai",
+  "displayName": "CourseBuddyAI",
   "version": "0.0.1",
   "description": "A basic Plasmo extension.",
   "author": "Plasmo Corp. <foss@plasmo.com>",
@@ -18,6 +18,7 @@
     "@mui/styled-engine-sc": "^6.0.0-alpha.4",
     "@react-navigation/native-stack": "^6.9.17",
     "html-react-parser": "^5.0.6",
+    "jwt-decode": "^4.0.0",
     "plasmo": "^0.84.0",
     "react": "18.2.0",
     "react-dom": "18.2.0",
@@ -34,15 +35,8 @@
     "typescript": "5.2.2"
   },
   "manifest": {
-    "host_permissions": [
-      "https://*/*"
-    ],
     "permissions": [
-      "tabs",
-      "identity",
-      "identity.email",
-      "windows",
-      "scripting"
+      "tabs"
     ],
     "web_accesible_resources": [
       {

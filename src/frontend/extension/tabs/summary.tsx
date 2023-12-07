@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react"
 import React from 'react'
-import {fetchSummary} from "../../src/utils/summary"
+import {fetchSummary} from "../utils/summary"
 
 
 function showSummary() {

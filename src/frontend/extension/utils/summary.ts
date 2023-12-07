@@ -1,5 +1,5 @@
-import {jwtDecode} from 'jwt-decode';
-import {BACKEND_URL} from '../config/index'
+
+import {BACKEND_URL} from './index'
 
 export const fetchSummary = async (course_Name: string, video_Name: string) => {
     if (!(course_Name.length > 0) || !(video_Name.length > 0)) {

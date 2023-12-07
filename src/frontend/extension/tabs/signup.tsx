@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react"
 import React from 'react'
 import { Box, TextField, Typography, Button, Container, Grid } from '@mui/material';
-import { signUp } from "../../src/utils/auth"
+import { signUp } from "../utils/auth"
 
 function SignUp() {
   const [email, setEmail] = useState('')

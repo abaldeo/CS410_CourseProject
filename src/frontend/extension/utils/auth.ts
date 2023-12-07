@@ -1,5 +1,5 @@
 import {jwtDecode} from 'jwt-decode';
-import { BASE_URL } from '../config';
+import { BASE_URL } from './index';
 
 export const isAuthenticated = () => {
   const permissions = localStorage.getItem('permissions');

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { Box, TextField, Typography, Button, CircularProgress } from '@mui/material';
 import { styled } from '@mui/material/styles'
 import * as style from "./styles.module.css"
-import {fetchAnswer} from '../../src/utils/chatbotanswer'
+import {fetchAnswer} from '../utils/chatbotanswer'
 
 
 interface Message {
