@@ -1,5 +1,5 @@
-import {jwtDecode} from 'jwt-decode';
-import { BACKEND_URL } from '../config';
+
+import { BACKEND_URL } from './index';
 
 export const fetchTranscriptList = async () => {
     const request = new Request(BACKEND_URL + 'file_upload/listLectureMaterials', {

@@ -7,10 +7,10 @@ import ReactDOM from 'react-dom'
 import { Box, TextField, Typography, Button, Container, Grid, MenuItem, Menu} from '@mui/material'
 import SettingsIcon from '@mui/icons-material/Settings'
 import LogoutIcon from '@mui/icons-material/Logout'
-import { login, isAuthenticated } from "../src/utils/auth"
-import {logout} from "../src/utils/auth"
-import {fetchSummary} from "../src/utils/summary"
-import {fetchTranscriptList} from "../src/utils/fileUploading"
+import { login, isAuthenticated } from "./utils/auth"
+import {logout} from "./utils/auth"
+import {fetchSummary} from ".//utils/summary"
+import {fetchTranscriptList} from "./utils/fileUploading"
 import { FileView} from "./fileView"
 
 // const [isLoggedIn, setIsLoggedIn] = useState(false)

@@ -1,5 +1,5 @@
-import {jwtDecode} from 'jwt-decode';
-import {BACKEND_URL} from '../config/index'
+
+import {BACKEND_URL} from './index'
 
 export const fetchAnswer = async (question: string) => {
     if (!(question.length > 0)) {
