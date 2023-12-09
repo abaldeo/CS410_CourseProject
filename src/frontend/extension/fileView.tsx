@@ -14,7 +14,14 @@ export const FileView = ({closeFileView}) => {
         var cleanArray = []
         for (let i = 0; i < res.length; i++) {
             if (res[i].type == "transcripts") {
-                cleanArray.push(res[i].file.split('_')[1])
+                if (res[i].course != "cs410") {
+                    console.log(res[i].file)
+                    cleanArray.push(res[i].file)
+                }
+                else {
+                    cleanArray.push(res[i].file.split('_')[1])
+                }
+                // cleanArray.push(res[i].file.split('_')[1])
             }
         }
         setList(cleanArray)
@@ -22,6 +29,8 @@ export const FileView = ({closeFileView}) => {
     // for (let i = 0; i < list.length; i++) {
     //     list[i] = list[i].slice(30);
     // }
+    // list.sort()
+    // console.log(list)
     const arrayDataItems = list.map((transcript) => <ListItem sx={{cursor: "pointer", color: "#FFFFFF"}} onClick={() => {
         setTimeout(() => {
             sendMessage(transcript)
