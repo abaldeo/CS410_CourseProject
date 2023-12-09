@@ -4,6 +4,7 @@ import typing as t
 
 from . import models, schemas
 from app.core.security import get_password_hash
+from sqlalchemy.dialects.postgresql import insert
 
 
 def get_user(db: Session, user_id: int):
@@ -67,3 +68,74 @@ def edit_user(
     db.commit()
     db.refresh(db_user)
     return db_user
+
+async def create_file_upload(db,
+                             course_id: str,
+                             course_name: str,
+                             week_number: str,
+                             lecture_number: str,
+                             lecture_title: str,
+                             source_url: str,
+                             s3_url: str,
+                             file_name: str,
+                             doc_type: str,
+                             file_md5: str):
+    db_file_upload = models.FileUpload(
+        course_id=course_id,
+        course_name=course_name,
+        week_number=week_number,
+        lecture_number=lecture_number,
+        lecture_title=lecture_title,
+        source_url=source_url,
+        s3_url=s3_url,
+        file_name=file_name,
+        doc_type=doc_type,
+        file_md5=file_md5,
+    )
+
+    stmt = insert(models.FileUpload).values(
+        course_id=course_id,
+        course_name=course_name,
+        week_number=week_number,
+        lecture_number=lecture_number,
+        lecture_title=lecture_title,
+        source_url=source_url,
+        s3_url=s3_url,
+        file_name=file_name,
+        doc_type=doc_type,
+        file_md5=file_md5,
+    ).on_conflict_do_update(
+        constraint=models.FileUpload.__table__.primary_key,
+        set_={
+            "course_id": course_id,
+            "course_name": course_name,
+            "week_number": week_number,
+            "lecture_number": lecture_number,
+            "lecture_title": lecture_title,
+            "source_url": source_url,
+            "s3_url": s3_url,
+            "file_name": file_name,
+            "doc_type": doc_type,
+            "file_md5": file_md5,
+        }
+    )
+
+    await db.execute(stmt)
+    await db.commit()
+    return db_file_upload
+
+
+
+from sqlalchemy.future import select
+
+async def uploaded_file_exists(db , md5_hash: str):
+    result = (await db.execute(select(models.FileUpload).filter(models.FileUpload.file_md5 == md5_hash))).scalars().first()
+    return result is not None
+
+def delete_file_upload(db: Session, s3_url: str):
+    file_upload =  db.query(models.FileUpload).filter(models.FileUpload.s3_url == s3_url).first()
+    if not file_upload:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, detail="File not found")
+    db.delete(file_upload)
+    db.commit()
+    return file_upload
