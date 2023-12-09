@@ -51,6 +51,7 @@ dependencies = [
     "s3fs>=2023.9.0",
     "gcloud>=0.18.3",
     "deptry>=0.12.0",
+    "lazy-load>=0.8.3",
 ]
 requires-python = ">=3.11,<3.12"
 readme = "../../README.md"

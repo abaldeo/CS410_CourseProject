@@ -25,39 +25,59 @@ from pydantic import BaseModel
 from app.core.config import settings, get_settings
 from loguru import logger
 
+from lazy_load import lazy, lazy_func
+
 
 # load_dotenv()
 
 router = r = APIRouter()
 
-REDIS_URL = settings.EMBEDDING_REDIS_URL
-REDIS_TOKEN = settings.EMBEDDING_REDIS_TOKEN
-REDIS_HOST = settings.EMBEDDING_REDIS_HOST
-REDIS_PORT = settings.EMBEDDING_REDIS_PORT 
-REDIS_PASSWD = settings.EMBEDDING_REDIS_PASSWD
-
 
 @functools.lru_cache()
 def get_redis_instance():
     # redis_client = Redis(url=REDIS_URL, token=REDIS_TOKEN, rest_retries=5, rest_retry_interval=3, allow_telemetry=False)    
+    REDIS_URL = settings.EMBEDDING_REDIS_URL
+    REDIS_TOKEN = settings.EMBEDDING_REDIS_TOKEN
+    REDIS_HOST = settings.EMBEDDING_REDIS_HOST
+    REDIS_PORT = settings.EMBEDDING_REDIS_PORT 
+    REDIS_PASSWD = settings.EMBEDDING_REDIS_PASSWD
     redis_client = redis.Redis( host=REDIS_HOST, port=REDIS_PORT,password=REDIS_PASSWD)
     return redis_client
 
-redis_instance = get_redis_instance()
-REDIS_STORE  = RedisStore(client= redis_instance, ttl=None, namespace="embedding_service")
+@lazy_func
+def get_redis_store():
+    logger.info("Creating RedisStore")
+    redis_instance = get_redis_instance()
+    return RedisStore(client= redis_instance, ttl=None, namespace="embedding_service")
 
 GPT_MODEL_NAME = settings.GPT_MODEL_NAME
 S3_BUCKET_NAME = settings.S3_BUCKET_NAME
-EMEDDING_MODEL  = get_embedding_model(settings.EMBEDDING_MODEL_NAME)
+EMBEDDING_MODEL_NAME = settings.EMBEDDING_MODEL_NAME
+# EMBEDDING_MODEL  = get_embedding_model()
 # EMBEDDING_CACHE = UpstashRedisStore(client=redis_client, ttl=None, namespace="embedding_service")
 
-EMBEDDER = CacheBackedEmbeddings.from_bytes_store(
-    underlying_embeddings=EMEDDING_MODEL, 
-    document_embedding_cache=REDIS_STORE, 
-    namespace=GPT_MODEL_NAME
-)
+# redis_instance = lazy(get_redis_instance)
+REDIS_STORE  = get_redis_store()
+# EMBEDDING_MODEL  = lazy(get_embedding_model)
 
-VECTOR_DB =  create_vectorstore(embedding_model=EMBEDDER)
+
+@lazy_func
+def get_embedder(redis_store, gpt_model_name):
+    logger.info("Creating Embedder")
+    embedding_model = get_embedding_model()
+    return CacheBackedEmbeddings.from_bytes_store(
+    underlying_embeddings=embedding_model, 
+    document_embedding_cache=redis_store, 
+    namespace=gpt_model_name)
+
+# EMBEDDER = CacheBackedEmbeddings.from_bytes_store(
+#     underlying_embeddings=EMBEDDING_MODEL, 
+#     document_embedding_cache=REDIS_STORE, 
+#     namespace=GPT_MODEL_NAME
+# )
+EMBEDDER = get_embedder(REDIS_STORE, GPT_MODEL_NAME)
+
+VECTOR_DB =  lazy(create_vectorstore, EMBEDDER)
 
 
 @r.get("/computeQueryEmbedding")
@@ -65,7 +85,7 @@ def compute_query_embedding(query_text: str):
     # text_splitter = get_token_splitter(MODEL_NAME)
     # chunks = chunk_texts(query_text, text_splitter)
     # model = get_embedding_model()
-    # model = EMEDDING_MODEL
+    # model = EMBEDDING_MODEL
     with Timer() as t:
         vectors = create_query_embeddings(query_text, EMBEDDER)
     token_count = num_tokens_from_string(query_text, GPT_MODEL_NAME)
@@ -84,7 +104,7 @@ def store_document_embedding(request:FileItem):
     # text_splitter = get_token_splitter(MODEL_NAME)
     chunks = chunk_docs(document, text_splitter)
     # model = get_embedding_model()
-    # model  = EMEDDING_MODEL
+    # model  = EMBEDDING_MODEL
     token_count = sum([num_tokens_from_string(doc.page_content, GPT_MODEL_NAME) for doc in chunks])
     with Timer() as t:
         vectors = create_doc_embeddings(chunks, EMBEDDER)

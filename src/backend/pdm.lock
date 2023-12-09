@@ -5,7 +5,7 @@
 groups = ["default"]
 strategy = ["cross_platform"]
 lock_version = "4.4"
-content_hash = "sha256:7639a377e045ab4eec2810257144364ee086bda4373c3cb589a490505c2f95e6"
+content_hash = "sha256:a2d008d14a6da0ae1bebfe331d4065ef22d056a93b33ca493e1c9a626b41224b"
 
 [[package]]
 name = "aioboto3"
@@ -1314,6 +1314,34 @@ dependencies = [
 files = [
     {file = "layoutparser-0.3.4-py3-none-any.whl", hash = "sha256:269aedfab8a0caa50aef8d0fa62740fbee1f2964880daae3a0e6a0415363126a"},
     {file = "layoutparser-0.3.4.tar.gz", hash = "sha256:0dfb2194c36a5ad1075b8310f3cbc280c00306d1758cef127d20283f7ce085ea"},
+]
+
+[[package]]
+name = "lazy-load"
+version = "0.8.3"
+summary = "ℒazy-ℒoad - A minimalistic interface that allows the lazy evaluation of expressions. Additional functions and wrappers allow it to easily use the lazy evaluation for functions and classes."
+dependencies = [
+    "lazy-object-proxy>=1.3.1",
+]
+files = [
+    {file = "lazy_load-0.8.3-py3-none-any.whl", hash = "sha256:46e3d4840f77b9fc4045fb70ebad2a110a1a8d3e9332c8cc8d48be134caa918f"},
+    {file = "lazy_load-0.8.3.tar.gz", hash = "sha256:b5e9276e26b382bec872750c84d92247aa7846575922436e29d20c29bd873dad"},
+]
+
+[[package]]
+name = "lazy-object-proxy"
+version = "1.9.0"
+requires_python = ">=3.7"
+summary = "A fast and thorough lazy object proxy."
+files = [
+    {file = "lazy-object-proxy-1.9.0.tar.gz", hash = "sha256:659fb5809fa4629b8a1ac5106f669cfc7bef26fbb389dda53b3e010d1ac4ebae"},
+    {file = "lazy_object_proxy-1.9.0-cp311-cp311-macosx_10_9_x86_64.whl", hash = "sha256:946d27deaff6cf8452ed0dba83ba38839a87f4f7a9732e8f9fd4107b21e6ff07"},
+    {file = "lazy_object_proxy-1.9.0-cp311-cp311-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:79a31b086e7e68b24b99b23d57723ef7e2c6d81ed21007b6281ebcd1688acb0a"},
+    {file = "lazy_object_proxy-1.9.0-cp311-cp311-manylinux_2_5_x86_64.manylinux1_x86_64.manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:f699ac1c768270c9e384e4cbd268d6e67aebcfae6cd623b4d7c3bfde5a35db59"},
+    {file = "lazy_object_proxy-1.9.0-cp311-cp311-musllinux_1_1_aarch64.whl", hash = "sha256:bfb38f9ffb53b942f2b5954e0f610f1e721ccebe9cce9025a38c8ccf4a5183a4"},
+    {file = "lazy_object_proxy-1.9.0-cp311-cp311-musllinux_1_1_x86_64.whl", hash = "sha256:189bbd5d41ae7a498397287c408617fe5c48633e7755287b21d741f7db2706a9"},
+    {file = "lazy_object_proxy-1.9.0-cp311-cp311-win32.whl", hash = "sha256:81fc4d08b062b535d95c9ea70dbe8a335c45c04029878e62d744bdced5141586"},
+    {file = "lazy_object_proxy-1.9.0-cp311-cp311-win_amd64.whl", hash = "sha256:f2457189d8257dd41ae9b434ba33298aec198e30adf2dcdaaa3a28b9994f6adb"},
 ]
 
 [[package]]
