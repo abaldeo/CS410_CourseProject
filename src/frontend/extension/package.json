@@ -1,7 +1,7 @@
 {
   "name": "course-buddy-ai",
   "displayName": "CourseBuddyAI",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "CourseBuddyAI is a Chrome extension that enhances the Coursera Platform, allowing users to upload lecture files for summarization.",
   "author": "Avinash Baldeo, Colton Bailey, Kacper Dural, Zach Pohl",
   "scripts": {

@@ -10,7 +10,6 @@ export const config: PlasmoCSConfig = {
 }
 
 export const getInlineAnchor: PlasmoGetInlineAnchor = () =>
-    // document.querySelectorAll('button[aria-label="Notes, opens notes panel"]')[0]
     document.querySelectorAll('button[id="save-note-button"]')[0]
 
 export const getShadowHostID = () => "summary-button"
@@ -22,7 +21,6 @@ export const getStyle = () => {
 }
 
 const Summary = () => {
-    const [currentUrl, setCurrentUrl] = useState<string>("")
     const [videoName, setVideoName] = useState<string>("")
     const [courseName, setCourseName] = useState<string>("")
     const [summaryVisible, setSummaryVisible] = useState<boolean>(false)

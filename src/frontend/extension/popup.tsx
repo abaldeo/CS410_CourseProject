@@ -2,7 +2,6 @@ import { useState, useEffect } from "react"
 import * as style from "./styles.module.css"
 import { FileUpload } from "./uploadfile"
 import React from 'react'
-// import {ChatBox} from "./tabs/chatbox"
 import ReactDOM from 'react-dom'
 import { Box, TextField, Typography, Button, Container, Grid, MenuItem, Menu} from '@mui/material'
 import SettingsIcon from '@mui/icons-material/Settings'
@@ -13,43 +12,9 @@ import {fetchSummary} from ".//utils/summary"
 import {fetchTranscriptList} from "./utils/fileUploading"
 import { FileView} from "./fileView"
 
-// const [isLoggedIn, setIsLoggedIn] = useState(false)
-// chrome.runtime.onMessage.addListener(
-//   function(request, sender, sendResponse) {
-//     console.log(sender.tab ?
-//                 "from a content script:" + sender.tab.url :
-//                 "from the extension");
-//     if (request.greeting === "hello")
-//       chrome.windows.create({
-//         url: "./tabs/summary.html",
-//         type: "popup",
-//         height: 500,
-//         width: 500
-//       })
-//   }
-// );
-
-// const getBullets = async (course, video) => {
-//   await fetchSummary(course, video).then(res => {
-//     return res
-//   })
-// }
-
-// let summaryString = ""
-// chrome.runtime.onMessage.addListener(
-//   function(request, sender, sendResponse) {
-//     console.log(request.url_string);
-//     if (request.cn != "")
-//       fetchSummary(request.cn, request.vn).then(res => {
-//         sendResponse({bullets: res})
-//     })
-//   }
-// );
-
 
 
 function Login() {
-  // const [isLoggedIn, setIsLoggedIn] = useState(false)
   const [email, setEmail] = useState('')
   const [pwd, setPwd] = useState('')
 
@@ -60,26 +25,17 @@ function Login() {
   }
 
   function handleSuccess() {
-    // console.log(isAuthenticated())
-    // window.sessionStorage.setItem('user', email)
     window.close()
   }
   function handleFailure() {
-    console.log(isAuthenticated())
     alert("Login Failed")
   }
 
   const handleSubmit = async (e) => {
     e.preventDefault()
     login(email, pwd).then(handleSuccess, handleFailure)
-    // console.log(isAuthenticated())
   }
 
-  // if (isLoggedIn) {
-  //   return(
-  //     <IndexPopup/>
-  //   )
-  // }
   return (
     <Container component="main">
       <Box
@@ -142,7 +98,6 @@ function Login() {
             Sign Up
           </Button>
         </Box>
-        {/* {isLoggedIn && <IndexPopup/>} */}
       </Box>
     </Container>
   );
@@ -150,8 +105,6 @@ function Login() {
 
 function IndexPopup() {
   const [currentUrl, setCurrentUrl] = useState<string>("")
-  // const [currentUsername, setCurrentUsername] = useState<string>("")
-  // const [openChatbox, setOpenChatbox] = useState(false)
   const [openUpload, setOpenUpload] = useState(false)
   const [openFiles, setOpenFiles] = useState(false)
   const [openSettings, setOpenSettings] = useState(false)
@@ -160,23 +113,12 @@ function IndexPopup() {
   const getCurrentUrl = async () => {
     const [tab] = await chrome.tabs.query({active: true, currentWindow: true})
     setCurrentUrl(tab.url)
-    // const response = await chrome.tabs.sendMessage(tab.id, {url_string: tab.url});
   }
 
-  // function getCurrentUsername() {
-  //   // chrome.identity.getProfileUserInfo(function(info) {
-  //   //   setCurrentUsername(info.email.substring(0, info.email.indexOf("@")))
-  //   //   if (info.email.length == 0) {
-  //   //     setCurrentUsername("Anon")
-  //   //   }
-  //   // })
-  //   setCurrentUsername(window.sessionStorage.getItem('user'))
-  // }
 
 
   useEffect(() => {
     getCurrentUrl()
-    // getCurrentUsername()
   }, [currentUrl])
   
   if (currentUrl.includes("coursera.org/learn")) {

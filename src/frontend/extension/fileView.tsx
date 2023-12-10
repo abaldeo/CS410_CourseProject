@@ -21,16 +21,10 @@ export const FileView = ({closeFileView}) => {
                 else {
                     cleanArray.push(res[i].file.split('_')[1])
                 }
-                // cleanArray.push(res[i].file.split('_')[1])
             }
         }
         setList(cleanArray)
     })
-    // for (let i = 0; i < list.length; i++) {
-    //     list[i] = list[i].slice(30);
-    // }
-    // list.sort()
-    // console.log(list)
     const arrayDataItems = list.map((transcript) => <ListItem sx={{cursor: "pointer", color: "#FFFFFF"}} onClick={() => {
         setTimeout(() => {
             sendMessage(transcript)
