@@ -66,8 +66,7 @@ def get_transcript_from_s3(s3_path: str) -> List[Document]:
         List[Document]: List of one Document object that is the transcript for a specific video
     """
     parsed_s3 = urlparse(url=s3_path, allow_fragments=False)
-    parsed_s3.path.lstrip('/')
-    loader = S3FileLoader(bucket=parsed_s3.netloc, key=parsed_s3.path, 
+    loader = S3FileLoader(bucket=parsed_s3.netloc, key= parsed_s3.path.lstrip('/'), 
                           region_name=settings.AWS_REGION_NAME, endpoint_url=settings.S3_ENDPOINT_URL,
                           aws_access_key_id=settings.AWS_ACCESS_KEY_ID, aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY)
     try:
