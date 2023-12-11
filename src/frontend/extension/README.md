@@ -1,3 +1,42 @@
+## Contents
+
+The contents folder includes the code for embedding the Generate Summary button into Course lecture video pages. Due to Chrome security guidelines, content scripts such as this cannot make API calls, therefore the API call to retrieve the summary is made in our background script which sends it back to the content script as a message. The course name and video name are retrieved directly from the page's URL.
+
+## Tabs
+
+The tabs folder contains the code for the secondary popup windows present in our extension. These include the Chatbox popup in which you can ask questions about lecture content, the sign up popup window for creating an account, as well as the popup window that displays summaries for specific files, selectable from the "View Uploaded Files" button in the main extension popup. Plasmo automatically converts the Typescript files into readable HTML.
+
+## Utils
+
+The utils folder contains the helper functions that are used to retrive/upload information from our backend. These are used for signing in/signing up, retrieving answers to user's questions in the Chatbox feature, uploading new files for other courses, and retrieving a summary for a video or power point.
+
+## background.ts
+
+This is our background script. It is only necessary to help our content script with communicating with our backend. It receives a message, telling it what to do, then sends a response back to the message sender.
+
+## fileview.tsx
+
+This file includes the code for displaying uploaded files. It retrieves a list of all transcripts and PDF's and displays them in a list. These items can be clicked to display their summaries in a new pop up window.
+
+## popup.tsx
+
+This is our extension main popup that you see when clicking the extensions icon in Chrome. It includes a login page, as well as the home view, which allows for uploading a new file, viewing already uploaded files, and opening the ChatBot feature.
+
+## uploadfile.tsx
+
+This includes the code for the file uploading menu. It allows you to select and submit a file to be uploaded into our database.
+
+
+
+
+
+
+
+
+
+
+
+
 MORE CLEAR INSTRUCTIONS INCLUDED AT BOTTOM
 
 This is a [Plasmo extension](https://docs.plasmo.com/) project bootstrapped with [`plasmo init`](https://www.npmjs.com/package/plasmo).
