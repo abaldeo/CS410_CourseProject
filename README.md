@@ -10,7 +10,7 @@ Please see the links below for the project submission grading
 2. [Project Progess Report](https://github.com/abaldeo/CS410_CourseProject/blob/main/reports/CS410%20Project%20Progress%20Report.pdf)
 3. [Project Final Report](https://github.com/abaldeo/CS410_CourseProject/blob/main/reports/CS410%20Project%20Final%20Status%20Report.pdf)
 4. [Project Documentation](https://github.com/abaldeo/CS410_CourseProject/blob/main/docs/CS410%20Project%20Documentation.pdf)
-5. [Project Presentation Slides] ()
+5. [Project Presentation Slides](https://github.com/abaldeo/CS410_CourseProject/blob/main/docs/CS410%20Project%20Presentation%20Deck.pdf)
 6. [Project Presentation & Demo ] ()
    
 
