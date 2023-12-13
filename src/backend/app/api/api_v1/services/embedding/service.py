@@ -62,9 +62,9 @@ REDIS_STORE  = get_redis_store()
 
 
 @lazy_func
-def get_embedder(redis_store, gpt_model_name):
+def get_embedder(embedding_model_name, redis_store, gpt_model_name):
     logger.info("Creating Embedder")
-    embedding_model = get_embedding_model()
+    embedding_model = get_embedding_model(embedding_model_name)
     return CacheBackedEmbeddings.from_bytes_store(
     underlying_embeddings=embedding_model, 
     document_embedding_cache=redis_store, 
@@ -75,7 +75,7 @@ def get_embedder(redis_store, gpt_model_name):
 #     document_embedding_cache=REDIS_STORE, 
 #     namespace=GPT_MODEL_NAME
 # )
-EMBEDDER = get_embedder(REDIS_STORE, GPT_MODEL_NAME)
+EMBEDDER = get_embedder(EMBEDDING_MODEL_NAME, REDIS_STORE, GPT_MODEL_NAME)
 
 VECTOR_DB =  lazy(create_vectorstore, EMBEDDER)
 
