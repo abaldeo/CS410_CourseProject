@@ -2,7 +2,17 @@
 
 ## Overview
 
-CourseBuddyAI is a Chrome extension designed to enhance the Coursera Online Learning Platform, allowing students to upload lecture transcripts and slides (PDF/PPT) for automated summarization. These documents will be indexed in a vector database. Subsequently, we will employ the Retrieval Augmentation Generation (RAG) technique, in combination with a large language model like ChatGPT to build a Q&A chatbot interface based on the uploaded course content. The full project proposal and progress reports are stored in this repository under the reports folder. 
+CourseBuddyAI is a Chrome extension designed to enhance the Coursera Online Learning Platform, allowing students to upload lecture transcripts and slides for automated summarization. These documents will be indexed in a vector database. Subsequently, we will employ the Retrieval Augmentation Generation (RAG) technique, in combination with a large language model like ChatGPT to build a Q&A chatbot interface based on the uploaded course content. The full project proposal and progress reports are stored in this repository under the reports folder. 
+
+## :point_right: **Attention Peer Reviewers & TA's :exclamation:** 
+Please see the links below for the project submission grading
+1. [Project Proposal](https://github.com/abaldeo/CS410_CourseProject/blob/main/reports/CS410%20Project%20Proposal.pdf)
+2. [Project Progess Report](https://github.com/abaldeo/CS410_CourseProject/blob/main/reports/CS410%20Project%20Progress%20Report.pdf)
+3. [Project Final Report](https://github.com/abaldeo/CS410_CourseProject/blob/main/reports/CS410%20Project%20Final%20Status%20Report.pdf)
+4. [Project Documentation](https://github.com/abaldeo/CS410_CourseProject/blob/main/docs/CS410%20Project%20Documentation.pdf)
+5. [Project Presentation Slides] ()
+6. [Project Presentation & Demo ] ()
+   
 
 ## Team Members
 
