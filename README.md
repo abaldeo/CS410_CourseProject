@@ -10,14 +10,14 @@ CourseBuddyAI is a Chrome extension designed to enhance the Coursera Online Lear
 
 **Team Members:**
 
-- Avinash Badeo (@abaldeo2)
+- Avinash Baldeo (@abaldeo2)
 - Zach Pohl (@zcpohl2)
 - Colton Bailey (@coltonb4)
 - ~~Ehsan Sarfaraz (@ehsans3)~~ 
 - Kacper Dural (@kdural2)
 
 
-## Features
+## Tech Stack
 
 - **FastAPI** with Python 3.11
 - **React 16** with Typescript, Redux, and react-router
