@@ -4,8 +4,8 @@ import {fetchTranscriptList} from "./utils/fileUploading"
 import {List, ListItem} from '@mui/material'
 
 
-const sendMessage = async (video) => {
-    const response = await chrome.runtime.sendMessage({from: "fileView", courseName: "cs410", videoName: video })
+const sendMessage = async (video, course) => {
+    const response = await chrome.runtime.sendMessage({from: "fileView", courseName: course, videoName: video })
 }
 
 export const FileView = ({closeFileView}) => {
@@ -15,19 +15,30 @@ export const FileView = ({closeFileView}) => {
         for (let i = 0; i < res.length; i++) {
             if (res[i].type == "transcripts") {
                 if (res[i].course != "cs410") {
-                    console.log(res[i].file)
-                    cleanArray.push(res[i].file)
+                    console.log("Success")
+                    console.log(res[i])
+                    cleanArray.push(res[i])
                 }
                 else {
-                    cleanArray.push(res[i].file.split('_')[1])
+                    // cleanArray.push(res[i].file.split('_')[1])
+                    if (res[i].file.includes('_')) {
+                        res[i].file = res[i].file.split('_')[1]
+                        cleanArray.push(res[i])
+
+                    }
+                    else {
+                        cleanArray.push(res[i])
+                    }
+                    // cleanArray.push(res[i])
                 }
             }
         }
-        setList(cleanArray)
+        setList(cleanArray.sort())
+        console.log(res.sort())
     })
     const arrayDataItems = list.map((transcript) => <ListItem sx={{cursor: "pointer", color: "#FFFFFF"}} onClick={() => {
         setTimeout(() => {
-            sendMessage(transcript)
+            sendMessage(transcript.file, transcript.course)
         }, 1000)
         chrome.windows.create({
             url: "./tabs/summary.html",
@@ -35,8 +46,8 @@ export const FileView = ({closeFileView}) => {
             height: 500,
             width: 500
           })
-        sendMessage(transcript)
-    }}>{(transcript)}</ListItem>)
+        sendMessage(transcript.file, transcript.course)
+    }}>{(transcript.file)}</ListItem>)
     return (
         <div
         style={{
