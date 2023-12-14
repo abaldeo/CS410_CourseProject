@@ -235,6 +235,8 @@ def remove_course_file(fileName: str, courseName: str = '', userName: str = '',
                             secret=settings.AWS_SECRET_ACCESS_KEY,
                             endpoint_url=settings.S3_ENDPOINT_URL,
                             ) 
+        logger.info(fileName)
+        logger.info(s3.exists(fileName))
         if s3.exists(fileName) and s3.isfile(fileName):
             logger.warning(f"Removing {fileName}")            
             s3_url = S3Utils.make_s3_url(fileName, settings.S3_ENDPOINT_URL)
@@ -264,6 +266,7 @@ def list_s3_bucket_contents(courseName, courseFolder, detail, settings):
                         key=settings.AWS_ACCESS_KEY_ID,
                         secret=settings.AWS_SECRET_ACCESS_KEY,
                         endpoint_url=settings.S3_ENDPOINT_URL,
+                        use_listings_cache = False,
                         )
     bucket_name = settings.S3_BUCKET_NAME
     if not courseName: 
