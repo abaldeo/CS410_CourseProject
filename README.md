@@ -12,7 +12,14 @@ Please see the links below for the project submission grading
 4. [Project Documentation](https://github.com/abaldeo/CS410_CourseProject/blob/main/docs/CS410%20Project%20Documentation.pdf)
 5. [Project Presentation Slides](https://github.com/abaldeo/CS410_CourseProject/blob/main/docs/CS410%20Project%20Presentation%20Deck.pdf)
 6. [Project Presentation & Demo ] ()
-   
+7. Additional Source Code Documentation Links
+     - [Frontend](https://github.com/abaldeo/CS410_CourseProject/blob/main/src/frontend/extension/README.md)
+     - [Backend](https://github.com/abaldeo/CS410_CourseProject/blob/main/src/backend/app/api/api_v1/services/README.md)
+     - [Deployment](https://github.com/abaldeo/CS410_CourseProject/blob/main/.github/workflows/readme.md)
+     - [RAG Service](https://github.com/abaldeo/CS410_CourseProject/blob/main/src/backend/app/api/api_v1/services/rag/README.md)
+     - [Embedding Service](https://github.com/abaldeo/CS410_CourseProject/blob/main/src/backend/app/api/api_v1/services/embedding/README.md)
+     - [File Upload Service](https://github.com/abaldeo/CS410_CourseProject/blob/main/src/backend/app/api/api_v1/services/file_upload/README.md)
+     - [Summarization Service](https://github.com/abaldeo/CS410_CourseProject/blob/main/src/backend/app/api/api_v1/services/summarization/README.md)
 
 ## Team Members
 
