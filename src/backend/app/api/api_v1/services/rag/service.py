@@ -17,7 +17,7 @@ from langchain.embeddings import CacheBackedEmbeddings
 from pydantic import BaseModel
 from app.core.config import settings, get_settings
 from loguru import logger
-
+from lazy_load import lazy, lazy_func
 
 from langchain.globals import set_llm_cache
 from langchain.cache import InMemoryCache
@@ -27,36 +27,56 @@ set_llm_cache(InMemoryCache())
 
 router = r = APIRouter()
 
-REDIS_URL = settings.EMBEDDING_REDIS_URL
-REDIS_TOKEN = settings.EMBEDDING_REDIS_TOKEN
-REDIS_HOST = settings.EMBEDDING_REDIS_HOST
-REDIS_PORT = settings.EMBEDDING_REDIS_PORT 
-REDIS_PASSWD = settings.EMBEDDING_REDIS_PASSWD
-
-
 @functools.lru_cache()
 def get_redis_instance():
     # redis_client = Redis(url=REDIS_URL, token=REDIS_TOKEN, rest_retries=5, rest_retry_interval=3, allow_telemetry=False)    
+    REDIS_URL = settings.EMBEDDING_REDIS_URL
+    REDIS_TOKEN = settings.EMBEDDING_REDIS_TOKEN
+    REDIS_HOST = settings.EMBEDDING_REDIS_HOST
+    REDIS_PORT = settings.EMBEDDING_REDIS_PORT 
+    REDIS_PASSWD = settings.EMBEDDING_REDIS_PASSWD
     redis_client = redis.Redis( host=REDIS_HOST, port=REDIS_PORT,password=REDIS_PASSWD)
     return redis_client
 
-redis_instance = get_redis_instance()
-REDIS_STORE  = RedisStore(client= redis_instance, ttl=None, namespace="rag_service")
+# redis_instance = get_redis_instance()
+# REDIS_STORE  = RedisStore(client= redis_instance, ttl=None, namespace="rag_service")
 
+@lazy_func
+def get_redis_store():
+    logger.info("Creating RedisStore")
+    redis_instance = get_redis_instance()
+    return RedisStore(client= redis_instance, ttl=None, namespace="rag_service")
+
+REDIS_STORE  = get_redis_store()
 GPT_MODEL_NAME = settings.GPT_MODEL_NAME
+EMBEDDING_MODEL_NAME = settings.EMBEDDING_MODEL_NAME
 
-EMEDDING_MODEL  = get_embedding_model(settings.EMBEDDING_MODEL_NAME)
+# EMEDDING_MODEL  = get_embedding_model(settings.EMBEDDING_MODEL_NAME)
 # EMBEDDING_CACHE = UpstashRedisStore(client=redis_client, ttl=None, namespace="embedding_service")
 
-EMBEDDER = CacheBackedEmbeddings.from_bytes_store(
-    underlying_embeddings=EMEDDING_MODEL, 
-    document_embedding_cache=REDIS_STORE, 
-    namespace=GPT_MODEL_NAME
-)
 
-VECTOR_DB =  create_vectorstore(embedding_model=EMBEDDER)
 
-LLM = get_llm()
+@lazy_func
+def get_embedder(embedding_model_name, redis_store, gpt_model_name):
+    logger.info("Creating Embedder")
+    embedding_model = get_embedding_model(embedding_model_name)
+    return CacheBackedEmbeddings.from_bytes_store(
+    underlying_embeddings=embedding_model, 
+    document_embedding_cache=redis_store, 
+    namespace=gpt_model_name)
+    
+# EMBEDDER = CacheBackedEmbeddings.from_bytes_store(
+#     underlying_embeddings=EMEDDING_MODEL, 
+#     document_embedding_cache=REDIS_STORE, 
+#     namespace=GPT_MODEL_NAME
+# )
+EMBEDDER = get_embedder(EMBEDDING_MODEL_NAME, REDIS_STORE, GPT_MODEL_NAME)
+
+
+# VECTOR_DB =  create_vectorstore(embedding_model=EMBEDDER)
+VECTOR_DB =  lazy(create_vectorstore, EMBEDDER)
+
+LLM = lazy(get_llm)
 
  
  
@@ -87,25 +107,30 @@ def qa(question: str):
             question = clean_query_text(question)            
             return format_qa_response(qa_chain({"question": question}))
     except Exception as e:
-        logger.error(e)
-        return e
+        logger.exception(e)
+        return "Sorry, something went wrong..."
     
 
-from fastapi import WebSocket, WebSocketDisconnect
+from fastapi import WebSocket, WebSocketDisconnect, Depends, Request
 from app.api.api_v1.services.rag.callback import QuestionGenCallbackHandler, StreamingLLMCallbackHandler
 from app.api.api_v1.services.rag.schemas import ChatResponse
+import uuid 
 
 BAD_ANSWER="Hmm, I am not sure" 
 
 @r.websocket("/chat")
-async def websocket_endpoint(websocket: WebSocket):
+async def websocket_endpoint(websocket: WebSocket, session: str = Depends(lambda: Request.state.session)):
     await websocket.accept()
     question_handler = QuestionGenCallbackHandler(websocket)
     stream_handler = StreamingLLMCallbackHandler(websocket)
     # chat_history = []
     # qa_chain = create_qa_chain_with_sources(LLM, VECTOR_DB)
-
-    history = create_redis_history(session_id="test")
+    print(session)
+    session_id  =  session.get("session_id")
+    if not  session_id:
+        session_id = str(uuid.uuid4())
+        session.update({"session_id": session_id})
+    history = create_redis_history(session_id=session_id)
     memory = create_memory(history)
     qa_chain = create_conversation_chain(LLM, VECTOR_DB, memory, callbacks=[question_handler, stream_handler])
         
@@ -136,7 +161,7 @@ async def websocket_endpoint(websocket: WebSocket):
             logger.info("websocket disconnect")
             break
         except Exception as e:
-            logger.error(e)
+            logger.exception(e)
             resp = ChatResponse(
                 sender="bot",
                 message="Sorry, something went wrong. Try again.",

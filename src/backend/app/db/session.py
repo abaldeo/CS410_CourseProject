@@ -45,7 +45,7 @@ AsyncSessionFactory = async_sessionmaker(
     autocommit=False,
     autoflush=False,
     expire_on_commit=False,
-    bind=engine,
+    bind=async_engine,
     class_=AsyncSession,
 )
 
@@ -53,3 +53,11 @@ AsyncSessionFactory = async_sessionmaker(
 async def get_async_db() -> AsyncGenerator:
     async with AsyncSessionFactory() as session:
         yield session
+
+
+if __name__ == "__main__":
+    from app.db import models
+    db = SessionLocal()
+    x = db.query(models.FileUpload).all()
+    for i in x:
+        print(i.s3_url)

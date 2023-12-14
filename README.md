@@ -2,7 +2,24 @@
 
 ## Overview
 
-CourseBuddy is a Chrome extension designed to enhance the Coursera Online Learning Platform, allowing students to upload lecture transcripts and slides (PDF/PPT) for automated summarization. These documents will be indexed in a vector database. Subsequently, we will employ the Retrieval Augmentation Generation (RAG) technique, in combination with a large language model like ChatGPT/LLAMA2, to build a Q&A chatbot interface based on the uploaded course content. The full project proposal and progress reports are stored in this repository under the reports folder. 
+CourseBuddyAI is a Chrome extension designed to enhance the Coursera Online Learning Platform, allowing students to upload lecture transcripts and slides for automated summarization. These documents will be indexed in a vector database. Subsequently, we will employ the Retrieval Augmentation Generation (RAG) technique, in combination with a large language model like ChatGPT to build a Q&A chatbot interface based on the uploaded course content. The full project proposal and progress reports are stored in this repository under the reports folder. 
+
+## :point_right: **Attention Peer Reviewers & TA's :exclamation:** 
+Please see the links below for the project submission grading
+1. [Project Proposal](https://github.com/abaldeo/CS410_CourseProject/blob/main/reports/CS410%20Project%20Proposal.pdf)
+2. [Project Progess Report](https://github.com/abaldeo/CS410_CourseProject/blob/main/reports/CS410%20Project%20Progress%20Report.pdf)
+3. [Project Final Report](https://github.com/abaldeo/CS410_CourseProject/blob/main/reports/CS410%20Project%20Final%20Status%20Report.pdf)
+4. [Project Documentation](https://github.com/abaldeo/CS410_CourseProject/blob/main/docs/CS410%20Project%20Documentation.pdf)
+5. [Project Presentation Slides](https://github.com/abaldeo/CS410_CourseProject/blob/main/docs/CS410%20Project%20Presentation%20Deck.pdf)
+6. [Project Presentation & Demo ] ()
+7. Additional Source Code Documentation Links
+     - [Frontend](https://github.com/abaldeo/CS410_CourseProject/blob/main/src/frontend/extension/README.md)
+     - [Backend](https://github.com/abaldeo/CS410_CourseProject/blob/main/src/backend/app/api/api_v1/services/README.md)
+     - [Deployment](https://github.com/abaldeo/CS410_CourseProject/blob/main/.github/workflows/readme.md)
+     - [RAG Service](https://github.com/abaldeo/CS410_CourseProject/blob/main/src/backend/app/api/api_v1/services/rag/README.md)
+     - [Embedding Service](https://github.com/abaldeo/CS410_CourseProject/blob/main/src/backend/app/api/api_v1/services/embedding/README.md)
+     - [File Upload Service](https://github.com/abaldeo/CS410_CourseProject/blob/main/src/backend/app/api/api_v1/services/file_upload/README.md)
+     - [Summarization Service](https://github.com/abaldeo/CS410_CourseProject/blob/main/src/backend/app/api/api_v1/services/summarization/README.md)
 
 ## Team Members
 
@@ -10,14 +27,14 @@ CourseBuddy is a Chrome extension designed to enhance the Coursera Online Learni
 
 **Team Members:**
 
-- Avinash Badeo (@abaldeo2)
+- Avinash Baldeo (@abaldeo2)
 - Zach Pohl (@zcpohl2)
 - Colton Bailey (@coltonb4)
 - ~~Ehsan Sarfaraz (@ehsans3)~~ 
 - Kacper Dural (@kdural2)
 
 
-## Features
+## Tech Stack
 
 - **FastAPI** with Python 3.11
 - **React 16** with Typescript, Redux, and react-router
@@ -25,7 +42,7 @@ CourseBuddy is a Chrome extension designed to enhance the Coursera Online Learni
 - SqlAlchemy with Alembic for migrations
 - Pytest for backend tests
 - Jest for frontend tests
-- Perttier/Eslint (with Airbnb style guide)
+- Prettier/Eslint (with Airbnb style guide)
 - Docker compose for easier development
 - Nginx as a reverse proxy to allow backend and frontend on the same port
 

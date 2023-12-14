@@ -44,17 +44,17 @@ async def upload_summary_to_s3(course_name: str, transcript_name: str, summary_t
         aws_access_key_id=settings.AWS_ACCESS_KEY_ID, 
         aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY
     )
-
+    async with client as s3:
     # Upload the transcript text
-    await client.put_object(
-        Bucket=settings.S3_BUCKET_NAME, 
-        Key=f"{course_name}/summaries/{transcript_name}", 
-        Body=summary_text, 
-        ACL='private', 
-        Metadata={
-            'x-amz-meta-my-key': 'placeholder-value'
-        }
-    )
+        await s3.put_object(
+            Bucket=settings.S3_BUCKET_NAME, 
+            Key=f"{course_name}/summaries/{transcript_name}", 
+            Body=summary_text, 
+            ACL='private', 
+            Metadata={
+                'x-amz-meta-my-key': 'placeholder-value'
+            }
+        )
 
 def get_transcript_from_s3(s3_path: str) -> List[Document]:
     """Retrieves the text transcript of a video from s3
@@ -66,8 +66,7 @@ def get_transcript_from_s3(s3_path: str) -> List[Document]:
         List[Document]: List of one Document object that is the transcript for a specific video
     """
     parsed_s3 = urlparse(url=s3_path, allow_fragments=False)
-    parsed_s3.path.lstrip('/')
-    loader = S3FileLoader(bucket=parsed_s3.netloc, key=parsed_s3.path, 
+    loader = S3FileLoader(bucket=parsed_s3.netloc, key= parsed_s3.path.lstrip('/'), 
                           region_name=settings.AWS_REGION_NAME, endpoint_url=settings.S3_ENDPOINT_URL,
                           aws_access_key_id=settings.AWS_ACCESS_KEY_ID, aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY)
     try:
@@ -106,7 +105,7 @@ def check_cache(course_name: str, video_name: str, redis_instance: Redis) -> dic
         return {
             "courseName": course_name, 
             "videoName": video_name, 
-            "summary": redis_instance.hget(cache_key)
+            "summary": redis_instance.hget(name=cache_key, key="summary")
             }
     else:
         return None
@@ -120,7 +119,7 @@ def save_to_cache(course_name: str, video_name: str, summary: str, redis_instanc
         summary (str): Summary of transcript
         redis_instance (Redis): redis instance for caching
      """
-     redis_instance.hset(key=f"{course_name}/{video_name}", value=summary)
+     redis_instance.hset(name=f"{course_name}/{video_name}",key="summary", value=summary)
 
 def get_encoder_for_model(model_name: str): 
     try:
@@ -142,7 +141,7 @@ def chunk_docs(docs,text_splitter, clean=True):
     chunks = text_splitter.split_documents(docs)
     return chunks
 
-def create_html_bullet_point(input_str: str) -> str:
+def create_html_bullet_point(input_str: str, split_char="\n") -> str:
     """Converts a string of multiple items into an html bullet point list 
 
     Args:
@@ -152,7 +151,9 @@ def create_html_bullet_point(input_str: str) -> str:
         str: html structure as a string e.g. <ul><li>bullet one</li></ul>
     """
     html_string = "<ul>"
-    for bullet_point in input_str.split("\n\n"):
+    for bullet_point in input_str.split(split_char):
+        if not bullet_point: continue 
+        bullet_point = bullet_point.replace('-','', 1)
         html_string += f"<li>{bullet_point}</li>"
     html_string += "</ul>"
     return html_string

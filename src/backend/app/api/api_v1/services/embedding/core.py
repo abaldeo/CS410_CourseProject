@@ -231,7 +231,7 @@ def chunk_texts(texts, text_splitter, clean=True,post_clean=True):
     if clean: texts = clean_text(texts)        
     if not isinstance(texts, list): texts = [texts]            
     chunks = text_splitter.create_documents(texts)
-    if post_clean: chunks = post_clean_text(texts)        
+    if post_clean: clean_documents(chunks, post_clean_text)   
     return chunks
 
 # def clean_texts(texts):
