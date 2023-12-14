@@ -55,7 +55,8 @@ class FileUploadResult(BaseModel):
 
 #TODO add to db as well     
 @router.post("/uploadTranscript")
-async def upload_lecture_transcript(req: TranscriptUploadModel, db= Depends(session.get_async_db)):
+async def upload_lecture_transcript(background_tasks: BackgroundTasks, 
+                                    req: TranscriptUploadModel, db= Depends(session.get_async_db)):
     userName = req.userName
     courseName = req.courseName
     videoName = req.videoName
@@ -82,6 +83,10 @@ async def upload_lecture_transcript(req: TranscriptUploadModel, db= Depends(sess
         await create_file_upload(db, course_id=courseName, course_name='', week_number='', lecture_number='',
                                 lecture_title=videoName, source_url='', s3_url=file_url, file_name=filename,
                                 doc_type='transcript', file_md5=md5_hash)
+
+        s3_path = f"s3://{settings.S3_BUCKET_NAME}/{courseName}/transcripts/{filename}"
+        video_name =  filename
+        background_tasks.add_task(call_generate_summary, courseName, video_name, s3_path)        
     return result 
 
 @router.get("/retrieveTranscript/")
@@ -299,9 +304,9 @@ def format_file_listing(files, courseName, courseFolder, detail, settings):
 
 
 def call_generate_summary(courseName, video_name , s3_path):
-    # logger.info(courseName)
-    # logger.info(video_name)
-    # logger.info(s3_path)
+    logger.info(courseName)
+    logger.info(video_name)
+    logger.info(s3_path)
     with httpx.Client() as client:
         response = client.post("https://cs410-pl7lwtg5za-uc.a.run.app/api/v1/summarization/generateSummary",
                               json=  {"userId" : 0, 
