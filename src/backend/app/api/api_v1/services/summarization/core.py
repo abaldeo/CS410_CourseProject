@@ -141,7 +141,7 @@ def chunk_docs(docs,text_splitter, clean=True):
     chunks = text_splitter.split_documents(docs)
     return chunks
 
-def create_html_bullet_point(input_str: str) -> str:
+def create_html_bullet_point(input_str: str, split_char="\n") -> str:
     """Converts a string of multiple items into an html bullet point list 
 
     Args:
@@ -151,7 +151,9 @@ def create_html_bullet_point(input_str: str) -> str:
         str: html structure as a string e.g. <ul><li>bullet one</li></ul>
     """
     html_string = "<ul>"
-    for bullet_point in input_str.split("\n\n"):
+    for bullet_point in input_str.split(split_char):
+        if not bullet_point: continue 
+        bullet_point = bullet_point.replace('-','', 1)
         html_string += f"<li>{bullet_point}</li>"
     html_string += "</ul>"
     return html_string
