@@ -2,7 +2,7 @@
 import { BACKEND_URL } from './index';
 
 export const fetchTranscriptList = async () => {
-    const request = new Request(BACKEND_URL + 'file_upload/listLectureMaterials', {
+    const request = new Request(BACKEND_URL + 'file_upload/listLectureMaterials?detail=false', {
         method: 'GET'
       });
     const response = await fetch(request);
@@ -10,6 +10,6 @@ export const fetchTranscriptList = async () => {
         throw new Error('Internal server error');
     }
     const data = await response.json();
-    console.log(data)
+    // console.log(data)
     return data;
 }

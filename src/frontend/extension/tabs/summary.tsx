@@ -6,6 +6,7 @@ import {fetchSummary} from "../utils/summary"
 function showSummary() {
 
     const [videoName, setVideoName] = useState("")
+    const [courseName, setCourseName] = useState("")
     const [summary, setSummary] = useState("<p>Loading...</p>")
 
     chrome.runtime.onMessage.addListener(
@@ -15,11 +16,17 @@ function showSummary() {
             sendResponse("Received")
             console.log("Received")
             console.log(request.videoName)
+            console.log(request.courseName)
             setVideoName(request.videoName.split(".")[0])
+            setCourseName(request.courseName)
+
         }
     );
 
-    fetchSummary("cs410", videoName).then(res => {
+    console.log(courseName)
+    console.log(videoName)
+
+    fetchSummary(courseName, videoName).then(res => {
         
         setSummary(res.summary)
         console.log(res)

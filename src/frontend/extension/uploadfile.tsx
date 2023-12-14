@@ -1,6 +1,6 @@
 import React, { useState, type FormEvent, useEffect } from 'react';
 import * as style from "./styles.module.css"
-import { BACKEND_URL } from '../src/config';
+import { BACKEND_URL } from './utils/index';
 
 export const FileUpload = ({closePopupUpload}) => {
 
@@ -18,9 +18,22 @@ export const FileUpload = ({closePopupUpload}) => {
     const getCurrentUrl = async () => {
       const [tab] = await chrome.tabs.query({active: true, currentWindow: true})
       setCurrentUrl(tab.url)
+      setCourseName(tab.url.split('/')[4].replace('-', ''))
+      setVideoName(tab.url.split('/')[7])
     }
 
-    useEffect(() => {getCurrentUrl()})
+    useEffect(() => {
+      getCurrentUrl()
+    })
+
+    useEffect(() => {
+      fetchWithAuth(JSON.stringify({
+        userName: "",
+        videoName: videoName + ".en",
+        courseName: courseName,
+        transcriptText: transcriptText
+    }), "uploadTranscript", "application/json");
+    }, [transcriptText])
 
     async function fetchWithAuth(body: string | FormData, endpt: string, headerType: string) {
         try {
@@ -57,6 +70,8 @@ export const FileUpload = ({closePopupUpload}) => {
         event.preventDefault();
         // await getCurrentUrl();
         console.log(currentUrl)
+        console.log(courseName)
+        console.log(videoName)
         if (currentUrl) {
           setCourseName(currentUrl.split('/')[4].replace('-', ''))
           setVideoName(currentUrl.split('/')[7])
@@ -75,16 +90,18 @@ export const FileUpload = ({closePopupUpload}) => {
         else {
           const fileReader = new FileReader();
           fileReader.readAsText(event.target.fileInput.files[0]);
+          let textAsString = ""
           fileReader.onload = e => {
-            const textAsString = fileReader.result;
+            textAsString = fileReader.result.toString();
             setTranscriptText(textAsString);
           };
-          fetchWithAuth(JSON.stringify({
-              userName: "",
-              videoName: videoName,
-              courseName: courseName,
-              transcriptText: transcriptText
-          }), "uploadTranscript", "application/json");
+          console.log(textAsString)
+          // fetchWithAuth(JSON.stringify({
+          //     userName: "",
+          //     videoName: videoName + ".en",
+          //     courseName: courseName,
+          //     transcriptText: textAsString
+          // }), "uploadTranscript", "application/json");
           
         }
         
