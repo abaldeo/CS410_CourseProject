@@ -127,14 +127,14 @@ async def retrieve_transcript(course_name, transcript_name, settings):
 
 
 
-async def upload_slide(course_name, slide_file, settings):
+async def upload_slide(course_name, slide_file, settings, folder='slides'):
     aws_region_name= settings.AWS_REGION_NAME
     s3_endpoint_url=  settings.S3_ENDPOINT_URL
     aws_access_key_id=settings.AWS_ACCESS_KEY_ID
     aws_secret_access_key= settings.AWS_SECRET_ACCESS_KEY        
     s3_bucket = settings.S3_BUCKET_NAME     
     course_name = str(course_name).lower().replace("-", "").replace(" ", "").strip()   
-    object_key = f"{course_name}/slides/{slide_file.filename}"
+    object_key = f"{course_name}/{folder}/{slide_file.filename}"
     metadata = {
         'x-amz-meta-course-name': course_name,
         'x-amz-meta-lecture-title': slide_file.filename,

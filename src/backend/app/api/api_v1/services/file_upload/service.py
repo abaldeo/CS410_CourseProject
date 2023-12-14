@@ -1,5 +1,6 @@
 import pathlib
 from fastapi import APIRouter, UploadFile, File, HTTPException, status, Depends
+from fastapi import BackgroundTasks
 from app.db import session
 from app.db.crud import create_file_upload, uploaded_file_exists, delete_file_upload
 from fastapi.responses import Response, FileResponse, StreamingResponse
@@ -8,6 +9,7 @@ from .core import upload_transcript, retrieve_transcript, upload_slide, retrieve
 from pydantic import BaseModel, HttpUrl
 from loguru import logger
 import hashlib 
+import httpx 
 
 router = r = APIRouter()
 
@@ -103,20 +105,24 @@ async def calculate_md5(f: UploadFile):
     return hasher.hexdigest()
 
 @router.post("/uploadSlide")
-async def upload_lecture_slide(courseName: str, slideFile: UploadFile,  videoName: str = '', userName: str='', 
+async def upload_lecture_slide(background_tasks: BackgroundTasks, 
+                               courseName: str, slideFile: UploadFile,  videoName: str = '', userName: str='', 
                                db=Depends(session.get_async_db)):
     settings = get_settings()    
     try:
-        courseName = str(courseName).lower().replace("-", "").replace(" ", "").strip()                           
+        courseName = str(courseName).lower().replace("-", "").replace(" ", "").strip()                             
         logger.debug(f"User {userName} uploading slide {slideFile.filename} for {courseName}")             
         md5_hash = await calculate_md5(slideFile)
         if await uploaded_file_exists(db, md5_hash):
             raise Exception(f"File {slideFile.filename} already exists!")
-        # content_type = slideFile.content_type            
+        # # # content_type = slideFile.content_type            
         file_type = pathlib.Path(slideFile.filename).suffix
         if file_type not in CONTENT_TYPE_MAP.keys():
             raise Exception(f'Unsupported file type: {slideFile.filename}. Supported types are {CONTENT_TYPE_MAP.keys()}')
-        file_url = await upload_slide(courseName, slideFile, settings)
+        await slideFile.seek(0)
+        folder_name = 'transcripts' if file_type in ['.txt'] else 'slides'
+        file_url = await upload_slide(courseName, slideFile, settings, folder_name)
+        
         message =  f'{slideFile.filename} uploaded successfully'
         logger.info(message)
         result = FileUploadResult(url=file_url, message=message, filename=slideFile.filename,
@@ -125,7 +131,11 @@ async def upload_lecture_slide(courseName: str, slideFile: UploadFile,  videoNam
         await create_file_upload(db, course_id=courseName, course_name='', week_number='', lecture_number='',
                                  lecture_title='', source_url='', s3_url=file_url, file_name=slideFile.filename,
                                  doc_type='slides', file_md5=md5_hash)
-                                 
+
+        if file_type in ['.txt']:
+            s3_path = f"s3://{settings.S3_BUCKET_NAME}/{courseName}/{folder_name}/{slideFile.filename}"
+            video_name = videoName if videoName else slideFile.filename
+            background_tasks.add_task(call_generate_summary, courseName, video_name, s3_path)
     except Exception as e:
         logger.exception(e)
         result = FileUploadResult(filename=slideFile.filename,content_type=slideFile.content_type, size=slideFile.size,
@@ -137,7 +147,8 @@ async def upload_lecture_slide(courseName: str, slideFile: UploadFile,  videoNam
 
 #TODO use asyncio.gather to upload multiple files
 @router.post("/uploadSlides")
-async def upload_lecture_slides(courseName: str, slideFiles: list[UploadFile], userName: str='', 
+async def upload_lecture_slides(background_tasks: BackgroundTasks,
+                                courseName: str, slideFiles: list[UploadFile], userName: str='', 
                                 db=Depends(session.get_async_db)):
     settings = get_settings()
     results = []
@@ -152,8 +163,9 @@ async def upload_lecture_slides(courseName: str, slideFiles: list[UploadFile], u
             file_type = pathlib.Path(slideFile.filename).suffix
             if file_type not in CONTENT_TYPE_MAP.keys():
                 raise Exception(f'Unsupported file type: {slideFile.filename}. Supported types are {CONTENT_TYPE_MAP.keys()}')
-                            
-            file_url = await upload_slide(courseName, slideFile, settings)
+            folder_name = 'transcripts' if file_type in ['.txt'] else 'slides'            
+            await slideFile.seek(0)                            
+            file_url = await upload_slide(courseName, slideFile, settings, folder_name)
             message =  f'{slideFile.filename} uploaded successfully'
             logger.info(message)
             result = FileUploadResult(url=file_url, message=message, filename=slideFile.filename,
@@ -162,6 +174,11 @@ async def upload_lecture_slides(courseName: str, slideFiles: list[UploadFile], u
             await create_file_upload(db, course_id=courseName, course_name='', week_number='', lecture_number='',
                                  lecture_title='', source_url='', s3_url=file_url, file_name=slideFile.filename,
                                  doc_type='slide', file_md5=md5_hash)
+            if file_type in ['.txt']:
+                s3_path = f"s3://{settings.S3_BUCKET_NAME}/{courseName}/{folder_name}/{slideFile.filename}"
+                video_name = slideFile.filename
+                background_tasks.add_task(call_generate_summary, courseName, video_name, s3_path)
+                            
         except Exception as e:
             logger.exception(e)
             result = FileUploadResult(filename=slideFile.filename,content_type=slideFile.content_type, size=slideFile.size,
@@ -221,7 +238,7 @@ def remove_course_file(fileName: str, courseName: str = '', userName: str = '',
         if s3.exists(fileName) and s3.isfile(fileName):
             logger.warning(f"Removing {fileName}")            
             s3_url = S3Utils.make_s3_url(fileName, settings.S3_ENDPOINT_URL)
-            logger.debug(s3_url)
+            logger.info(s3_url)
             delete_file_upload(db, s3_url)
             s3.rm_file(fileName)            
             return f"{fileName} removed successfully!"        
@@ -231,7 +248,7 @@ def remove_course_file(fileName: str, courseName: str = '', userName: str = '',
             if s3.exists(filePath) and s3.isfile(filePath):
                 logger.warning(f"Removing {filePath}")
                 s3_url = S3Utils.make_s3_url(filePath, settings.S3_ENDPOINT_URL)
-                logger.debug(s3_url)
+                logger.info(s3_url)
                 delete_file_upload(db, s3_url)    
                 s3.rm_file(filePath)                            
                 return f"{courseName} file {fileName} removed successfully!"
@@ -276,3 +293,18 @@ def format_file_listing(files, courseName, courseFolder, detail, settings):
         if detail: mydict.update(file)
         results.append( mydict)
     return results
+
+
+def call_generate_summary(courseName, video_name , s3_path):
+    # logger.info(courseName)
+    # logger.info(video_name)
+    # logger.info(s3_path)
+    with httpx.Client() as client:
+        response = client.post("https://cs410-pl7lwtg5za-uc.a.run.app/api/v1/summarization/generateSummary",
+                              json=  {"userId" : 0, 
+                                    "courseName": courseName,
+                                    "videoName": video_name,
+                                    "s3_path": s3_path,
+                                    }, timeout=300)
+        
+        logger.info(response.json())
