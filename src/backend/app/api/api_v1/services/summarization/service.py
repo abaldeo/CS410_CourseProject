@@ -8,7 +8,8 @@ from typing import List
 from .core import check_cache, save_to_cache, upload_summary_to_s3, get_transcript_from_s3, SummaryRequestModel, \
     generate_summary, get_summary_from_s3, create_html_bullet_point
 from app.core.config import settings
-
+from loguru import logger
+import orjson as json
 
 router = APIRouter()
 
@@ -85,9 +86,11 @@ async def generateSummary(summary_model: SummaryRequestModel) -> dict:
             "status": True,
             "msg": "success"
             }
-        result.update(summary_model.json())
-        result.pop("transcript", "")
+        summary_dict = json.loads(summary_model.json())
+        summary_dict.pop("transcript", "")
+        result.update(summary_dict)
         return result
     except Exception as exception:
+        logger.exception(exception)
         return failure_dict
     
