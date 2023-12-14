@@ -134,7 +134,7 @@ async def upload_lecture_slide(background_tasks: BackgroundTasks,
 
         if file_type in ['.txt']:
             s3_path = f"s3://{settings.S3_BUCKET_NAME}/{courseName}/{folder_name}/{slideFile.filename}"
-            video_name = videoName if videoName else slideFile.filename
+            video_name =  slideFile.filename
             background_tasks.add_task(call_generate_summary, courseName, video_name, s3_path)
     except Exception as e:
         logger.exception(e)
@@ -176,7 +176,7 @@ async def upload_lecture_slides(background_tasks: BackgroundTasks,
                                  doc_type='slide', file_md5=md5_hash)
             if file_type in ['.txt']:
                 s3_path = f"s3://{settings.S3_BUCKET_NAME}/{courseName}/{folder_name}/{slideFile.filename}"
-                video_name = slideFile.filename
+                video_name =  slideFile.filename
                 background_tasks.add_task(call_generate_summary, courseName, video_name, s3_path)
                             
         except Exception as e:
