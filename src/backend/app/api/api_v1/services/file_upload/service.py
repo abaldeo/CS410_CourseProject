@@ -227,3 +227,17 @@ def format_file_listing(files, courseName, courseFolder, detail, settings):
         if detail: mydict.update(file)
         results.append( mydict)
     return results
+
+
+
+async def calculate_md5(file_path):
+    import hashlib 
+    hasher = hashlib.md5()
+    with open(file_path, 'rb') as f:
+        for chunk in iter(lambda: f.read(4096), b''):
+            hasher.update(chunk)
+    return hasher.hexdigest()
+
+async def check_for_duplicates(s3, bucket_name, md5_hash):
+    response = await s3.list_objects_v2(Bucket=bucket_name, Prefix=md5_hash)
+    return response['KeyCount'] > 0

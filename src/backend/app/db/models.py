@@ -13,3 +13,12 @@ class User(Base):
     hashed_password = Column(String, nullable=False)
     is_active = Column(Boolean, default=True)
     is_superuser = Column(Boolean, default=False)
+
+
+class Upload(Base):
+    __tablename__ = 'uploads'
+
+    id = Column(Integer, primary_key=True)
+    file_name = Column(String)
+    s3_url = Column(String)
+    file_md5 = Column(String)
